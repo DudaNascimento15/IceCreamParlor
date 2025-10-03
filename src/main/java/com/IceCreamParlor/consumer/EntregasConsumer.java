@@ -1,5 +1,7 @@
 package com.IceCreamParlor.consumer;
 
+import com.IceCreamParlor.dto.enums.StatusEntregaEnum;
+import com.IceCreamParlor.service.EntregasServiceImpl;
 import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.amqp.ImmediateAcknowledgeAmqpException;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -15,7 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class EntregasConsumer {
 
-    private final EntregaService entregaService;
+    private final EntregasServiceImpl entregaService;
     private final ProcessedEventRepository processed;
     private final MessageBus bus;
 
@@ -30,11 +32,11 @@ public class EntregasConsumer {
 
             // 2. Publica "despachado"
             bus.publish("entregas.pedido.despachado",
-                new EntregaDespachadaEvt(pedidoId),
+                new (pedidoId),
                 env.correlationId(), env.usuario());
 
             // 3. Simula progresso da entrega
-            entregaService.atualizarStatus(pedidoId, "a_caminho");
+            entregaService.atualizarStatus(pedidoId, StatusEntregaEnum.A_CAMINHO.toString());
             bus.publish("entregas.pedido.a_caminho",
                 new EntregaACaminhoEvt(pedidoId),
                 env.correlationId(), env.usuario());

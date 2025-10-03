@@ -1,5 +1,6 @@
 package com.IceCreamParlor.consumer;
 
+import com.IceCreamParlor.service.ProducaoServiceImpl;
 import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.amqp.ImmediateAcknowledgeAmqpException;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -15,7 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class ProducaoConsumer {
 
-    private final PedidoService pedidoService;
+    private final ProducaoServiceImpl pedidoService;
     private final ProcessedEventRepository processed;
     private final MessageBus bus;
 
