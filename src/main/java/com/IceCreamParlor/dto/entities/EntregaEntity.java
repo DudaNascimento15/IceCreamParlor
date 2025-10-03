@@ -1,9 +1,13 @@
 package com.IceCreamParlor.dto.entities;
 
+import com.IceCreamParlor.dto.enums.StatusEntregaEnum;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.Table;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.springframework.data.annotation.Id;
 
@@ -21,7 +25,8 @@ public class EntregaEntity {
     private UUID pedidoId;
 
     @Column(nullable = false)
-    private String status; // Ex: CRIADO, DESPACHADO, A_CAMINHO, ENTREGUE
+    @Enumerated(EnumType.STRING)
+    private StatusEntregaEnum status;
 
     @Column(name = "atualizado_em", nullable = false)
     private OffsetDateTime atualizadoEm = OffsetDateTime.now();
@@ -31,6 +36,6 @@ public class EntregaEntity {
 
     public EntregaEntity(String pedidoId, String criado) {
         this.pedidoId = UUID.fromString(pedidoId);
-        this.status = criado;
+        this.status = StatusEntregaEnum.CRIADO;
     }
 }

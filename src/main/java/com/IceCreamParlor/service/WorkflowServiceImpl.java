@@ -1,6 +1,6 @@
 package com.IceCreamParlor.service;
 
-import com.IceCreamParlor.dto.entities.SagaState;
+import com.IceCreamParlor.dto.entities.WorkflowEntity;
 import com.IceCreamParlor.dto.events.WorkflowEvents;
 import com.IceCreamParlor.dto.repositories.SagaStateRepository;
 import com.IceCreamParlor.service.insterfaces.WorkflowService;
@@ -29,7 +29,7 @@ public class WorkflowServiceImpl implements WorkflowService {
     public UUID iniciarPedido(String clienteId, BigDecimal total, String usuario) {
         UUID pedidoId = UUID.randomUUID();
 
-        var s = new SagaState(pedidoId, clienteId, total);
+        var s = new WorkflowEntity(pedidoId, clienteId, total);
         sagaStateRepository.save(s);
 
         var pedioIdStr = pedidoId.toString();
@@ -76,14 +76,14 @@ public class WorkflowServiceImpl implements WorkflowService {
 
     ;
 
-    public void tentaConfirmar(SagaState sagaState, String usuario){
-        if (sagaState.isPagamentoAprovado() && sagaState.isEstoqueReservado()) {
+    public void tentaConfirmar(WorkflowEntity workflowEntity, String usuario){
+        if (workflowEntity.isPagamentoAprovado() && workflowEntity.isEstoqueReservado()) {
            publish("pedidos.pedido.confirmado",
                new WorkflowEvents.PedidoConfirmado(
-                   sagaState.getPedidoId(),
-                   sagaState.getClienteId(),
-                   sagaState.getValorTotal()
-               ), sagaState.getPedidoId().toString(), usuario);
+                   workflowEntity.getPedidoId(),
+                   workflowEntity.getClienteId(),
+                   workflowEntity.getValorTotal()
+               ), workflowEntity.getPedidoId().toString(), usuario);
 
         }
     };

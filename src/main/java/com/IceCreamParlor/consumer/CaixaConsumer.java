@@ -1,25 +1,28 @@
 package com.IceCreamParlor.consumer;
 
-import java.math.BigDecimal;
-
+import com.IceCreamParlor.service.insterfaces.CaixaService;
+import com.rabbitmq.client.Envelope;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.amqp.ImmediateAcknowledgeAmqpException;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Service;
 
-import com.rabbitmq.client.Envelope;
-
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.math.BigDecimal;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class CaixaConsumer {
 
-    private final PedidoService pedidoService;
+    private final CaixaService pedidoService;
     private final ProcessedEventRepository processed; // tabela message_id único
     private final MessageBus bus;
+
+    public CaixaConsumer(CaixaService pedidoService, ProcessedEventRepository processed, MessageBus bus) {
+        this.pedidoService = pedidoService;
+        this.processed = processed;
+        this.bus = bus;
+    }
 
     @RabbitListener(queues = "q.caixa")
     public void onPagamento(Envelope<CaixaPagamentoIniciadoEvt> env) {
@@ -31,13 +34,13 @@ public class CaixaConsumer {
             if (aprovado) {
                 pedidoService.aprovarPagamento(env.data().pedidoId());
                 bus.publish("caixa.pagamento.aprovado",
-                        new CaixaPagamentoAprovadoEvt(env.data().pedidoId()),
-                        env.correlationId(), env.usuario());
+                    new CaixaPagamentoAprovadoEvt(env.data().pedidoId()),
+                    env.correlationId(), env.usuario());
             } else {
                 pedidoService.negarPagamento(env.data().pedidoId(), "cartão recusado");
                 bus.publish("caixa.pagamento.negado",
-                        new CaixaPagamentoNegadoEvt(env.data().pedidoId(), "cartão recusado"),
-                        env.correlationId(), env.usuario());
+                    new CaixaPagamentoNegadoEvt(env.data().pedidoId(), "cartão recusado"),
+                    env.correlationId(), env.usuario());
             }
 
             processed.save(new ProcessedEvent(env.messageId()));
