@@ -21,7 +21,7 @@ public class CaixaServiceImpl implements CaixaService {
 
     private static final String EX = "sorv.ex";
 
-    public void processarPagamento(CaixaEvents.PagamentoIniciado evento) {
+    public void processarPagamento(CaixaEvents.PagamentoAprovado evento) {
         System.out.println("Processando pagamento para o pedido: " + evento.pedidoId());
 
         boolean aprovado = simularAprovacao();

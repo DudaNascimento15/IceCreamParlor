@@ -37,7 +37,7 @@ public class WorkflowServiceImpl implements WorkflowService {
         publish
             ("caixa.pagamento.iniciado", new WorkflowEvents.PagamentoIniciado(pedidoId, usuario, total), pedioIdStr, usuario);
 
-        publish("estoque.reserva.solicitada", new WorkflowEvents.ReservaSolicitada(pedidoId), pedioIdStr, usuario);
+        publish("estoque.reserva.solicitada", new WorkflowEvents.ReservaSolicitada(pedidoId,usuario), pedioIdStr, usuario);
 
         publish("entrega.pedido.criar", new WorkflowEvents.EntregaCriada(pedidoId, s.getClienteId()), pedioIdStr, usuario);
 

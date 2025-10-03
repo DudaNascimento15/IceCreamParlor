@@ -5,6 +5,7 @@ import com.IceCreamParlor.dto.entities.EntregaEntity;
 import com.IceCreamParlor.dto.enums.StatusEntregaEnum;
 import com.IceCreamParlor.dto.events.EntregaEvents;
 import com.IceCreamParlor.dto.repositories.EntregaRepository;
+import com.IceCreamParlor.producer.EntregasProducer;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.jpa.internal.util.PessimisticNumberParser;
 import org.springframework.stereotype.Service;
@@ -21,6 +22,8 @@ public class EntregasServiceImpl {
 
     private final EntregasConsumer entregaProducer;
 
+    private final EntregasProducer entregasProducer;
+
 
     public void criarEntrega(String pedidoId, String clienteId) {
         // Lógica para criar uma nova entrega
@@ -32,17 +35,17 @@ public class EntregasServiceImpl {
 
     public void marcarComoDespachado(UUID pedidoId, String clienteId) {
       atualizarStatus(pedidoId, StatusEntregaEnum.DESPACHADO.toString());
-      entregaProducer.enviarPedidoDespachado(new EntregaEvents.PedidoDespachado(pedidoId, clienteId));
+        entregasProducer.publishPedidoDespachado(new EntregaEvents.PedidoDespachado(pedidoId, clienteId), pedidoId.toString(), clienteId);
     }
 
     public void marcarComoACaminho(UUID pedidoId, String clienteId) {
         atualizarStatus(pedidoId, StatusEntregaEnum.A_CAMINHO.toString());
-        entregaProducer.enviarPedidoACaminho(new EntregaEvents.PedidoACaminho(pedidoId, clienteId));
+        entregasProducer.publishPedidoACaminho(new EntregaEvents.PedidoACaminho(pedidoId, clienteId), pedidoId.toString(), clienteId);
     }
 
     public void marcarEntregue(UUID pedidoId, String clienteId) {
         atualizarStatus(pedidoId, StatusEntregaEnum.ENTREGUE.toString());
-        entregaProducer.enviarPedidoEntregue(new EntregaEvents.PedidoEntregue(pedidoId, clienteId));
+        entregasProducer.publishPedidoEntregue(new EntregaEvents.PedidoEntregue(pedidoId, clienteId), pedidoId.toString(), clienteId);
     }
 
     private void atualizarStatus(UUID pedidoId, String status) {

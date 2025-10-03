@@ -4,6 +4,7 @@ import com.IceCreamParlor.dto.entities.ProducaoEntity;
 import com.IceCreamParlor.dto.enums.StatusProducaoEnum;
 import com.IceCreamParlor.dto.events.ProducaoEvents;
 import com.IceCreamParlor.dto.repositories.ProducaoRepository;
+import com.IceCreamParlor.producer.ProducaoProducer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -15,7 +16,7 @@ public class ProducaoServiceImpl {
 
     private final ProducaoRepository repository;
 
-    private final Producao producer;
+    private final ProducaoProducer producer;
 
     public void iniciarProducao(ProducaoEvents.PedidoConfirmado evento) {
         ProducaoEntity producao = new ProducaoEntity(evento.pedidoId(), StatusProducaoEnum.EM_PREPARO.toString());
@@ -30,7 +31,7 @@ public class ProducaoServiceImpl {
         producao.finalizarProducao();
         repository.save(producao);
 
-        producer.enviarPedidoPronto(new ProducaoEvents.PedidoPronto(pedidoId, clienteId));
+        producer.publishPedidoPronto(new ProducaoEvents.PedidoPronto(pedidoId, clienteId), pedidoId.toString(), clienteId);
         System.out.println("Pedido pronto! Enviado para o Cliente: " + clienteId);
     }
 }
