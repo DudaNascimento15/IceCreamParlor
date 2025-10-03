@@ -1,5 +1,6 @@
 package com.IceCreamParlor.service;
 
+import com.IceCreamParlor.consumer.EntregasConsumer;
 import com.IceCreamParlor.dto.entities.EntregaEntity;
 import com.IceCreamParlor.dto.events.EntregaEvents;
 import com.IceCreamParlor.dto.repositories.EntregaRepository;
@@ -12,7 +13,7 @@ public class EntregasServiceImpl {
 
     private final EntregaRepository entregaRepository;
 
-    private final EntregaProducer entregaProducer;
+    private final EntregasConsumer entregaProducer;
 
     public EntregasServiceImpl(EntregaRepository entregaRepository) {
         this.entregaRepository = entregaRepository;

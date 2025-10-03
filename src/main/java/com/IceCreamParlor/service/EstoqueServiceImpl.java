@@ -1,14 +1,8 @@
 package com.IceCreamParlor.service;
 
-package com.icecreamparlor.estoque.service;
-
 import com.IceCreamParlor.dto.entities.EstoqueEntity;
 import com.IceCreamParlor.dto.events.EstoqueEvents;
 import com.IceCreamParlor.dto.repositories.EstoqueRepository;
-import com.icecreamparlor.dto.events.EstoqueEvents;
-import com.icecreamparlor.estoque.model.EstoqueReserva;
-import com.icecreamparlor.estoque.producer.EstoqueProducer;
-import com.icecreamparlor.estoque.repo.EstoqueReservaRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.Random;
@@ -17,7 +11,7 @@ import java.util.Random;
 public class EstoqueServiceImpl {
 
     private final EstoqueRepository repository;
-    private final EstoqueProducer producer;
+    //private final Estoqu producer;
     private final Random random = new Random();
 
     public EstoqueServiceImpl(EstoqueRepository repository, EstoqueProducer producer) {
