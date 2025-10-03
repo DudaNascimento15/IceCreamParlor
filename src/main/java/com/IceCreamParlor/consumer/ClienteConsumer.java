@@ -1,5 +1,6 @@
 package com.IceCreamParlor.consumer;
 
+import com.IceCreamParlor.service.insterfaces.ClienteService;
 import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.amqp.ImmediateAcknowledgeAmqpException;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -13,11 +14,16 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
+
 public class ClienteConsumer {
 
     private final ClienteService clienteService;
-    private final ProcessedEventRepository processed;
+
+    public ClienteConsumer(ClienteService clienteService) {
+        this.clienteService = clienteService;
+    }
+
+    private final  processed;
 
     @RabbitListener(queues = "q.cliente")
     public void onCliente(Envelope<ClienteEvt> env) {

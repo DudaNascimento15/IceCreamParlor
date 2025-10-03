@@ -1,5 +1,6 @@
 package com.IceCreamParlor.consumer;
 
+import com.IceCreamParlor.service.insterfaces.RelatorioService;
 import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.amqp.ImmediateAcknowledgeAmqpException;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;

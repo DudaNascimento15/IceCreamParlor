@@ -1,4 +1,4 @@
-package com.IceCreamParlor.service.insterfaces.RelatorioService;
+package com.IceCreamParlor.service;
 
 import com.IceCreamParlor.dto.entities.RelatorioEntity;
 import com.IceCreamParlor.dto.repositories.RelatorioRepository;

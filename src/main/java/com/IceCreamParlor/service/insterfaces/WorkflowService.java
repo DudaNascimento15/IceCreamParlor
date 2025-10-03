@@ -1,6 +1,6 @@
 package com.IceCreamParlor.service.insterfaces;
 
-import com.IceCreamParlor.dto.entities.SagaState;
+import com.IceCreamParlor.dto.entities.WorkflowEntity;
 
 import java.math.BigDecimal;
 import java.util.UUID;
@@ -17,7 +17,7 @@ public interface WorkflowService {
 
     void reservaNegada(UUID pedidoId);
 
-    void tentaConfirmar(SagaState sagaState, String usuario);
+    void tentaConfirmar(WorkflowEntity workflowEntity, String usuario);
 
     void publish(String routingKey, Object payload, String correlationId, String usuario);
 

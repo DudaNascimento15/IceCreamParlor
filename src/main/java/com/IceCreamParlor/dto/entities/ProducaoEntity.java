@@ -1,7 +1,10 @@
 package com.IceCreamParlor.dto.entities;
 
+import com.IceCreamParlor.dto.enums.StatusProducaoEnum;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +26,8 @@ public class ProducaoEntity {
     private UUID pedidoId;
 
     @Column(nullable = false)
-    private String status; // EM_PREPARO, PRONTO
+    @Enumerated(EnumType.STRING)
+    private StatusProducaoEnum status;
 
     @Column(name = "iniciado_em", nullable = false)
     private OffsetDateTime iniciadoEm = OffsetDateTime.now();
@@ -39,11 +43,11 @@ public class ProducaoEntity {
 
     public void Producao(UUID pedidoId, String status) {
         this.pedidoId = pedidoId;
-        this.status = status;
+        this.status = StatusProducaoEnum.valueOf(status);
     }
 
     public void finalizarProducao() {
-        this.status = "PRONTO";
+        this.status = StatusProducaoEnum.PRONTO;
         this.finalizadoEm = OffsetDateTime.now();
     }
 

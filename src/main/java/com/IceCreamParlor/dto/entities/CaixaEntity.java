@@ -1,7 +1,10 @@
 package com.IceCreamParlor.dto.entities;
 
+import com.IceCreamParlor.dto.enums.StatusCaixaEnum;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.Getter;
@@ -21,7 +24,8 @@ public class CaixaEntity {
    private String pedidoId;
 
     @Column(name = "status", columnDefinition = "varchar(20)", nullable = false)
-    private String status;
+    @Enumerated(EnumType.STRING)
+    private StatusCaixaEnum status;
 
     @Column(name = "motivo", columnDefinition = "varchar(255)")
     private String motivoNegacao;
@@ -34,7 +38,7 @@ public class CaixaEntity {
 
     public CaixaEntity(String pedidoId, String status,BigDecimal valor) {
         this.pedidoId = pedidoId;
-        this.status = status;
+        this.status = StatusCaixaEnum.valueOf(status);
         this.valor = valor;
     }
 

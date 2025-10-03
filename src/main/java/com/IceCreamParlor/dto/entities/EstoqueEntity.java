@@ -1,5 +1,6 @@
 package com.IceCreamParlor.dto.entities;
 
+import com.IceCreamParlor.dto.enums.StatusEstoqueEnum;
 import jakarta.persistence.*;
 
 import java.time.OffsetDateTime;
@@ -14,7 +15,8 @@ public class EstoqueEntity {
     private UUID pedidoId;
 
     @Column(nullable = false)
-    private String status; // CONFIRMADA, NEGADA
+    @Enumerated(EnumType.STRING)
+    private StatusEstoqueEnum status; // CONFIRMADA, NEGADA
 
     @Column(name = "motivo")
     private String motivo; // opcional, só se negado
@@ -29,7 +31,7 @@ public class EstoqueEntity {
 
     public void EntregaEntity(UUID pedidoId, String status, String motivo) {
         this.pedidoId = pedidoId;
-        this.status = status;
+        this.status = StatusEstoqueEnum.valueOf(status);
         this.motivo = motivo;
     }
 

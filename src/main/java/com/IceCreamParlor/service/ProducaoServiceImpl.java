@@ -1,41 +1,28 @@
 package com.IceCreamParlor.service;
 
-import com.IceCreamParlor.consumer.ProducaoConsumer;
 import com.IceCreamParlor.dto.entities.ProducaoEntity;
+import com.IceCreamParlor.dto.enums.StatusProducaoEnum;
 import com.IceCreamParlor.dto.events.ProducaoEvents;
 import com.IceCreamParlor.dto.repositories.ProducaoRepository;
-import com.icecreamparlor.producao.producer.ProducaoProducer;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
 
 @Service
-public class ProducaoService {
+@RequiredArgsConstructor
+public class ProducaoServiceImpl {
 
     private final ProducaoRepository repository;
-    private final ProducaoProducer producer;
 
-<<<<<<< Updated upstream
-    public ProducaoService(ProducaoRepository repository, ProducaoProducer producer) {
-        this.repository = repository;
-        this.producer = producer;
-    }
-=======
-    private final ProducaoConsumer producer;
->>>>>>> Stashed changes
+    private final Producao producer;
 
-    /**
-     * Inicia produção com status EM_PREPARO
-     */
     public void iniciarProducao(ProducaoEvents.PedidoConfirmado evento) {
-        ProducaoEntity producao = new ProducaoEntity(evento.pedidoId(), "EM_PREPARO");
+        ProducaoEntity producao = new ProducaoEntity(evento.pedidoId(), StatusProducaoEnum.EM_PREPARO.toString());
         repository.save(producao);
         System.out.println("Produção iniciada para pedido " + evento.pedidoId());
     }
 
-    /**
-     * Finaliza produção com status PRONTO e envia notificação
-     */
     public void finalizarProducao(UUID pedidoId, String clienteId) {
         ProducaoEntity producao = repository.findById(pedidoId)
             .orElseThrow(() -> new RuntimeException("Produção não encontrada para pedido: " + pedidoId));

@@ -15,7 +15,7 @@ import java.util.UUID;
 @Table(name = "saga_workflow")
 @Getter
 @Setter
-public class SagaState {
+public class WorkflowEntity {
 
     @Id
     @Column(name = "pedido_id", columnDefinition = "uuid", nullable = false)
@@ -33,15 +33,15 @@ public class SagaState {
     @Column(name = "estoque_Reservado", columnDefinition = "boolean")
     private boolean estoqueReservado;
 
-    @Column(name = "criado_em",columnDefinition = "timestamp with time zone", nullable = false)
+    @Column(name = "criado_em", columnDefinition = "timestamp with time zone", nullable = false)
     private OffsetDateTime criadoEm = OffsetDateTime.now();
 
-    protected SagaState() {
+    protected WorkflowEntity() {
     }
 
     ;
 
-    public SagaState(UUID pedidoId, String clienteId, BigDecimal valorTotal) {
+    public WorkflowEntity(UUID pedidoId, String clienteId, BigDecimal valorTotal) {
         this.pedidoId = pedidoId;
         this.clienteId = clienteId;
         this.valorTotal = valorTotal;
