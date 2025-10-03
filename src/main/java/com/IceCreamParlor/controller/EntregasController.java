@@ -1,15 +1,17 @@
-package com.IceCreamParlor.controller;
+package com.icecreamparlor.entregas.controller;
 
-import com.IceCreamParlor.dto.entities.EntregaEntity;
-import com.IceCreamParlor.dto.repositories.EntregaRepository;
-import lombok.RequiredArgsConstructor;
+import java.util.List;
+import java.util.UUID;
+
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
-import java.util.UUID;
+import com.IceCreamParlor.dto.entities.EntregaEntity;
+import com.IceCreamParlor.dto.repositories.EntregaRepository;
+
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/entregas")
