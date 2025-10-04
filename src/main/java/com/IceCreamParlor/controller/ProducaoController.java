@@ -1,4 +1,4 @@
-package com.icecreamparlor.producao.controller;
+package com.IceCreamParlor.controller;
 
 import com.IceCreamParlor.dto.entities.ProducaoEntity;
 import com.IceCreamParlor.dto.repositories.ProducaoRepository;

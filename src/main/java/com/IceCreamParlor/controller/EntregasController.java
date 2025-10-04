@@ -1,4 +1,4 @@
-package com.icecreamparlor.entregas.controller;
+package com.IceCreamParlor.controller;
 
 import java.util.List;
 import java.util.UUID;

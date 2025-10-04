@@ -17,7 +17,7 @@ import java.util.Random;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class CaixaServiceImpl implements CaixaService {
+public class CaixaServiceImpl {
 
     private final CaixaRepository caixaRepository;
 
