@@ -6,11 +6,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.retry.annotation.EnableRetry;
 
 import java.time.Instant;
 import java.util.UUID;
 
 @SpringBootApplication
+@EnableRetry
 public class MessagingRabbitmqApplication {
     private static RabbitTemplate rabbitTemplate;
     private static final String EXCHANGE = "sorv.ex";
