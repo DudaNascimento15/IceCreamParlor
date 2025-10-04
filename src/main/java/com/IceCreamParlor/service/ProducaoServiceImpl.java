@@ -4,7 +4,7 @@ import com.IceCreamParlor.dto.entities.ProducaoEntity;
 import com.IceCreamParlor.dto.enums.StatusProducaoEnum;
 import com.IceCreamParlor.dto.events.ProducaoEvents;
 import com.IceCreamParlor.dto.events.WorkflowEvents;
-import com.IceCreamParlor.dto.repositories.ProducaoRepository;
+import com.IceCreamParlor.repositories.ProducaoRepository;
 import com.IceCreamParlor.producer.ProducaoProducer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

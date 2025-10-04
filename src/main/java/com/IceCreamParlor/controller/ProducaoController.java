@@ -1,7 +1,7 @@
 package com.IceCreamParlor.controller;
 
 import com.IceCreamParlor.dto.entities.ProducaoEntity;
-import com.IceCreamParlor.dto.repositories.ProducaoRepository;
+import com.IceCreamParlor.repositories.ProducaoRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 

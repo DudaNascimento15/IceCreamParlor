@@ -2,22 +2,29 @@ package com.IceCreamParlor.dto.entities;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.UuidGenerator;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "saga_workflow")
+@Table(name = "workflow")
 @Getter
 @Setter
 public class WorkflowEntity {
 
     @Id
+    @UuidGenerator               // Hibernate 6 – gera UUID no Java
+    @Column(name = "id", nullable = false, columnDefinition = "uuid")
+    private UUID id;
+
     @Column(name = "pedido_id", columnDefinition = "uuid", nullable = false)
     private UUID pedidoId;
 

@@ -1,7 +1,7 @@
 package com.IceCreamParlor.service;
 
 import com.IceCreamParlor.dto.entities.RelatorioEntity;
-import com.IceCreamParlor.dto.repositories.RelatorioRepository;
+import com.IceCreamParlor.repositories.RelatorioRepository;
 import org.springframework.stereotype.Service;
 
 @Service

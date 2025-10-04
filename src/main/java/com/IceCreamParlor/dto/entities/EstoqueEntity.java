@@ -4,18 +4,22 @@ import com.IceCreamParlor.dto.enums.StatusEstoqueEnum;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.UuidGenerator;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "estoque_reservas")
+@Table(name = "estoque")
 @Getter
 @Setter
 public class EstoqueEntity {
 
-
     @Id
+    @UuidGenerator               // Hibernate 6 – gera UUID no Java
+    @Column(name = "id", nullable = false, columnDefinition = "uuid")
+    private UUID id;
+
     @Column(name = "pedido_id")
     private UUID pedidoId;
 

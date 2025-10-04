@@ -1,4 +1,4 @@
-package com.IceCreamParlor.dto.repositories;
+package com.IceCreamParlor.repositories;
 
 import com.IceCreamParlor.dto.entities.ClienteEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -11,5 +11,6 @@ import java.util.UUID;
 public interface ClienteRepository extends JpaRepository<ClienteEntity, UUID> {
 
     List<ClienteEntity> findByPedidoId(UUID pedidoId);
+
     List<ClienteEntity> findByClienteId(String clienteId);
 }

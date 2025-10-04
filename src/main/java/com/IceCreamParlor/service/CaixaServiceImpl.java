@@ -4,7 +4,7 @@ import com.IceCreamParlor.dto.entities.CaixaEntity;
 import com.IceCreamParlor.dto.enums.StatusCaixaEnum;
 import com.IceCreamParlor.dto.events.CaixaEvents;
 import com.IceCreamParlor.dto.events.WorkflowEvents;
-import com.IceCreamParlor.dto.repositories.CaixaRepository;
+import com.IceCreamParlor.repositories.CaixaRepository;
 import com.IceCreamParlor.producer.CaixaProducer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Random;
+import java.util.UUID;
 
 @Slf4j
 @Service
@@ -32,11 +33,9 @@ public class CaixaServiceImpl {
 
         boolean aprovado = simularAprovacao();
 
-        var pedidoIdString = evento.pedidoId().toString();
-
         if (aprovado) {
             CaixaEntity caixa = new CaixaEntity(
-                pedidoIdString,
+                evento.pedidoId(),
                 StatusCaixaEnum.APROVADO.toString(),
                 evento.valorTotal()
             );
@@ -53,7 +52,7 @@ public class CaixaServiceImpl {
             log.info("Pagamento aprovado, para o pedido: {}" + evento.pedidoId());
         } else {
             CaixaEntity caixa = new CaixaEntity(
-                pedidoIdString,
+                evento.pedidoId(),
                 StatusCaixaEnum.NEGADO.toString(),
                 evento.valorTotal()
             );

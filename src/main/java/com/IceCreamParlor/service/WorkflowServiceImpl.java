@@ -2,7 +2,7 @@ package com.IceCreamParlor.service;
 
 import com.IceCreamParlor.dto.entities.WorkflowEntity;
 import com.IceCreamParlor.dto.events.WorkflowEvents;
-import com.IceCreamParlor.dto.repositories.SagaStateRepository;
+import com.IceCreamParlor.repositories.SagaStateRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;

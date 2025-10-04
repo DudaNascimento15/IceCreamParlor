@@ -1,5 +1,5 @@
 
-package com.IceCreamParlor.messaging;
+package com.IceCreamParlor;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

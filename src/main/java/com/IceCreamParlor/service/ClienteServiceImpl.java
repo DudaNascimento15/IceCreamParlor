@@ -2,7 +2,7 @@ package com.IceCreamParlor.service;
 
 import com.IceCreamParlor.dto.entities.ClienteEntity;
 import com.IceCreamParlor.dto.events.ClienteEvents;
-import com.IceCreamParlor.dto.repositories.ClienteRepository;
+import com.IceCreamParlor.repositories.ClienteRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

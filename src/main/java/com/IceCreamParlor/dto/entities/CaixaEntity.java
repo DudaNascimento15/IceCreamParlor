@@ -5,13 +5,17 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.UuidGenerator;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
+import java.util.UUID;
 
 @Entity
 @Table(name = "caixa")
@@ -19,9 +23,13 @@ import java.time.OffsetDateTime;
 @Setter
 public class CaixaEntity {
 
-   @Id
-   @Column(name = "pedido_id", columnDefinition = "uuid", nullable = false)
-   private String pedidoId;
+    @Id
+    @UuidGenerator               // Hibernate 6 – gera UUID no Java
+    @Column(name = "id", nullable = false, columnDefinition = "uuid")
+    private UUID id;
+
+    @Column(name = "pedido_id", columnDefinition = "uuid", nullable = false)
+    private UUID pedidoId;
 
     @Column(name = "status", columnDefinition = "varchar(20)", nullable = false)
     @Enumerated(EnumType.STRING)
@@ -36,7 +44,7 @@ public class CaixaEntity {
     @Column(nullable = false)
     private OffsetDateTime criadoEm = OffsetDateTime.now();
 
-    public CaixaEntity(String pedidoId, String status,BigDecimal valor) {
+    public CaixaEntity(UUID pedidoId, String status, BigDecimal valor) {
         this.pedidoId = pedidoId;
         this.status = StatusCaixaEnum.valueOf(status);
         this.valor = valor;
@@ -44,6 +52,5 @@ public class CaixaEntity {
 
     protected CaixaEntity() {
     }
-
 
 }

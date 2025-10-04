@@ -1,7 +1,7 @@
 package com.IceCreamParlor.producer;
 
 import com.IceCreamParlor.dto.entities.RelatorioEntity;
-import com.IceCreamParlor.dto.repositories.RelatorioRepository;
+import com.IceCreamParlor.repositories.RelatorioRepository;
 import com.IceCreamParlor.messaging.EventPublisher;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

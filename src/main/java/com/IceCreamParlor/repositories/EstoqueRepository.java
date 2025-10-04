@@ -1,4 +1,4 @@
-package com.IceCreamParlor.dto.repositories;
+package com.IceCreamParlor.repositories;
 
 import com.IceCreamParlor.dto.entities.EstoqueEntity;
 import org.springframework.data.jpa.repository.JpaRepository;

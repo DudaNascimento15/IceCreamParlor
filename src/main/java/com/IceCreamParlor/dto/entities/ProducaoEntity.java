@@ -5,10 +5,13 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.UuidGenerator;
 import org.springframework.data.annotation.Id;
 
 import java.time.OffsetDateTime;
@@ -22,6 +25,10 @@ import java.util.UUID;
 public class ProducaoEntity {
 
     @Id
+    @UuidGenerator               // Hibernate 6 – gera UUID no Java
+    @Column(name = "id", nullable = false, columnDefinition = "uuid")
+    private UUID id;
+
     @Column(name = "pedido_id")
     private UUID pedidoId;
 

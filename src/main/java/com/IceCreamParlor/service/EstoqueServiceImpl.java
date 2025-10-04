@@ -4,7 +4,7 @@ import com.IceCreamParlor.dto.entities.EstoqueEntity;
 import com.IceCreamParlor.dto.enums.StatusEstoqueEnum;
 import com.IceCreamParlor.dto.events.EstoqueEvents;
 import com.IceCreamParlor.dto.events.WorkflowEvents;
-import com.IceCreamParlor.dto.repositories.EstoqueRepository;
+import com.IceCreamParlor.repositories.EstoqueRepository;
 import com.IceCreamParlor.producer.EstoqueProducer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,7 +22,7 @@ public class EstoqueServiceImpl {
     private final Random random = new Random();
 
     public void processarReserva(WorkflowEvents.ReservaSolicitada evento, String correlationId, String usuario) {
-        log.info("Processando reserva de estoque para o pedido: " + evento.pedidoId());
+        log.info("Processando reserva de estoque para o pedido: {}", evento.pedidoId());
 
         boolean sucesso = random.nextDouble() < 0.8; // simula verificação de estoque
 

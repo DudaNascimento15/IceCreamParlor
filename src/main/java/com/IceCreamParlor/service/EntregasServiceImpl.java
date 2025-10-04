@@ -3,7 +3,7 @@ package com.IceCreamParlor.service;
 import com.IceCreamParlor.dto.entities.EntregaEntity;
 import com.IceCreamParlor.dto.enums.StatusEntregaEnum;
 import com.IceCreamParlor.dto.events.EntregaEvents;
-import com.IceCreamParlor.dto.repositories.EntregaRepository;
+import com.IceCreamParlor.repositories.EntregaRepository;
 import com.IceCreamParlor.producer.EntregasProducer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
