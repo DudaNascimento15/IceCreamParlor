@@ -26,7 +26,7 @@ public class EntregasServiceImpl {
     private final EntregasProducer entregasProducer;
 
     @Transactional
-    public void processarEntrega(WorkflowEvents.EntregaCriada evento, String correlationId, String usuario) {
+    public void processarEntrega(EntregaEvents.CriarEntrega evento, String correlationId, String usuario) {
         log.info("Processando criação de entrega - pedidoId: {}", evento.pedidoId());
 
         criarEntrega(evento.pedidoId(), evento.clienteId());
@@ -38,7 +38,7 @@ public class EntregasServiceImpl {
         marcarEntregue(evento.pedidoId(), evento.clienteId(), correlationId, usuario);
     }
 
-      private void criarEntrega(UUID pedidoId, String clienteId) {
+      public void criarEntrega(UUID pedidoId, String clienteId) {
         EntregaEntity entrega = new EntregaEntity(pedidoId, StatusEntregaEnum.CRIADO);
         entregaRepository.save(entrega);
         log.info("entrega criada - pedidoId: {}", pedidoId);

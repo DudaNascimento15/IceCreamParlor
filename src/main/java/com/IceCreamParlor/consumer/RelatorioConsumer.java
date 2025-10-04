@@ -1,34 +1,47 @@
 package com.IceCreamParlor.consumer;
 
+import com.IceCreamParlor.dto.events.RelatorioEvents;
 import com.IceCreamParlor.service.RelatorioServiceImpl;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.AmqpRejectAndDontRequeueException;
-import org.springframework.amqp.ImmediateAcknowledgeAmqpException;
+import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Service;
 
-import com.rabbitmq.client.Envelope;
-
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class RelatorioConsumer {
 
     private final RelatorioServiceImpl relatorioService;
-    private final ProcessedEventRepository processed;
 
-    @RabbitListener(queues = "q.relatorio")
-    public void onRelatorio(Envelope<RelatorioEvt> env) {
-        if (processed.existsByMessageId(env.messageId())) return;
+    public RelatorioConsumer(RelatorioServiceImpl relatorioService) {
+        this.relatorioService = relatorioService;
+    }
+
+    @RabbitListener(queues = "q.relatorio.evento.recebido", containerFactory = "rabbitListenerContainerFactory")
+    public void onEventoRecebido(RelatorioEvents.EventoRecebido evento) {
         try {
-            relatorioService.gerar(env.data()); // processa/gera relatório
-            processed.save(new ProcessedEvent(env.messageId()));
-        } catch (ReprocessavelException e) {
-            throw new AmqpRejectAndDontRequeueException("retry", e);
+            log.info("Relatório: evento recebido - nome: {}", evento.nomeEvento());
+            relatorioService.salvarEvento(evento.nomeEvento(), evento.conteudo());
         } catch (Exception e) {
-            throw new ImmediateAcknowledgeAmqpException("poison", e);
+            log.error("Erro salvando evento recebido {}: {}", evento.nomeEvento(), e.getMessage());
+            throw new AmqpRejectAndDontRequeueException("Falha no salvamento de evento recebido", e);
         }
+    }
+
+    @RabbitListener(queues = "q.relatorio.evento.recebido.dlq", containerFactory = "rabbitListenerContainerFactory")
+    public void handleRelatorioDlq(RelatorioEvents.EventoRecebido evento, Message message) {
+        String reason = extractDeathReason(message);
+        log.warn("Mensagem em DLQ de Relatório - Evento: {}, Razão: {} (TTL expired? {})", evento.nomeEvento(), reason, "expired".equals(reason));
+        // Ação: relatorioService.salvarErroDlq(evento, reason);
+    }
+
+    private String extractDeathReason(Message message) {
+        @SuppressWarnings("unchecked")
+        List<Map<String, Object>> xDeath = (List<Map<String, Object>>) message.getMessageProperties().getHeaders().get("x-death");
+        return xDeath != null && !xDeath.isEmpty() ? (String) xDeath.get(0).get("reason") : "unknown";
     }
 }

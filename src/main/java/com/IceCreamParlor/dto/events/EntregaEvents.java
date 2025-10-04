@@ -4,6 +4,9 @@ import java.util.UUID;
 
 public class EntregaEvents {
 
+    public record CriarEntrega(UUID pedidoId, String clienteId) {
+    }
+
     public record PedidoDespachado(UUID pedidoId, String clienteId) {
     }
 

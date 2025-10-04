@@ -6,10 +6,6 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class EntregasProducer {
-    public void publishCriarEntrega(EntregaEvents.CriarEntrega evento, String correlationId, String usuario) {
-        MessagingRabbitmqApplication.publish("entregas.pedido.criar", evento, correlationId, usuario);
-    }
-
     public void publishPedidoDespachado(EntregaEvents.PedidoDespachado evento, String correlationId, String usuario) {
         MessagingRabbitmqApplication.publish("entregas.pedido.despachado", evento, correlationId, usuario);
     }
