@@ -1,39 +1,59 @@
 package com.IceCreamParlor.service;
 
 import com.IceCreamParlor.dto.entities.EstoqueEntity;
+import com.IceCreamParlor.dto.enums.StatusEstoqueEnum;
 import com.IceCreamParlor.dto.events.EstoqueEvents;
+import com.IceCreamParlor.dto.events.WorkflowEvents;
 import com.IceCreamParlor.dto.repositories.EstoqueRepository;
 import com.IceCreamParlor.producer.EstoqueProducer;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.Random;
 
+@Slf4j
 @Service
+@RequiredArgsConstructor
 public class EstoqueServiceImpl {
 
     private final EstoqueRepository repository;
     private final EstoqueProducer producer;
     private final Random random = new Random();
 
-    public EstoqueServiceImpl(EstoqueRepository repository, EstoqueProducer producer) {
-        this.repository = repository;
-        this.producer = producer;
-    }
+    public void processarReserva(WorkflowEvents.ReservaSolicitada evento, String correlationId, String usuario) {
+        log.info("Processando reserva de estoque para o pedido: " + evento.pedidoId());
 
-    public void processarReserva(EstoqueEvents.ReservaSolicitada evento) {
-        boolean sucesso = random.nextDouble() < 0.8;
+        boolean sucesso = random.nextDouble() < 0.8; // simula verificação de estoque
 
         if (sucesso) {
-            var reserva = new EstoqueEntity(evento.pedidoId(), "CONFIRMADA", null);
+            var reserva = new EstoqueEntity(
+                evento.pedidoId(),
+                StatusEstoqueEnum.CONFIRMADO
+            );
             repository.save(reserva);
-            producer.enviarReservaConfirmada(new EstoqueEvents.ReservaConfirmada(evento.pedidoId(), evento.clienteId()), evento.pedidoId().toString(), evento.clienteId());
-            System.out.println("Estoque reservado com sucesso: " + evento.pedidoId());
+            EstoqueEvents.ReservaConfirmada confirmada =
+                new EstoqueEvents.ReservaConfirmada(evento.pedidoId(), evento.clienteId());
+
+            producer.enviarReservaConfirmada(confirmada, correlationId, usuario);
+
+            log.info("✅ Estoque reservado com sucesso - pedidoId: {}", evento.pedidoId());
         } else {
             var motivo = "Sem estoque suficiente";
-            var reserva = new EstoqueEntity(evento.pedidoId(), "NEGADA", motivo);
+            var reserva = new EstoqueEntity(
+                evento.pedidoId(),
+                StatusEstoqueEnum.NEGADO,
+                motivo
+            );
             repository.save(reserva);
-            producer.enviarReservaNegada(new EstoqueEvents.ReservaNegada(evento.pedidoId(), motivo, evento.clienteId()), evento.pedidoId().toString(), evento.clienteId());
-            System.out.println("Falha na reserva de estoque: " + evento.pedidoId());
+            producer.enviarReservaNegada(
+                new EstoqueEvents.ReservaNegada(
+                    evento.pedidoId(),
+                    motivo,
+                    evento.clienteId()),
+                evento.pedidoId().toString(),
+                evento.clienteId());
+           log.info("Falha na reserva de estoque: " + evento.pedidoId());
         }
     }
 }

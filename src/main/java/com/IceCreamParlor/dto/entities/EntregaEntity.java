@@ -31,11 +31,22 @@ public class EntregaEntity {
     @Column(name = "atualizado_em", nullable = false)
     private OffsetDateTime atualizadoEm = OffsetDateTime.now();
 
-    public EntregaEntity() {
+    public EntregaEntity() {}
+
+    public EntregaEntity(String pedidoId, StatusEntregaEnum status) {
+        this.pedidoId = UUID.fromString(pedidoId);
+        this.status = status;
+        this.atualizadoEm = OffsetDateTime.now();
     }
 
-    public EntregaEntity(String pedidoId, String criado) {
-        this.pedidoId = UUID.fromString(pedidoId);
-        this.status = StatusEntregaEnum.CRIADO;
+    public EntregaEntity(UUID pedidoId, StatusEntregaEnum status) {
+        this.pedidoId = pedidoId;
+        this.status = status;
+        this.atualizadoEm = OffsetDateTime.now();
+    }
+
+    public void atualizarStatus(StatusEntregaEnum novoStatus) {
+        this.status = novoStatus;
+        this.atualizadoEm = OffsetDateTime.now();
     }
 }

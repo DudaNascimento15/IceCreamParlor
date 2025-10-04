@@ -32,13 +32,13 @@ public class ClienteEntity {
     @Column(name = "criado_em", nullable = false)
     private OffsetDateTime criadoEm = OffsetDateTime.now();
 
-
     protected ClienteEntity() {}
 
     public ClienteEntity(UUID pedidoId, String clienteId, String mensagem) {
         this.pedidoId = pedidoId;
         this.clienteId = clienteId;
         this.mensagem = mensagem;
+        this.criadoEm = OffsetDateTime.now();
     }
 
 }

@@ -16,6 +16,6 @@ public class RelatorioServiceImpl {
     public void salvarEvento(String nomeEvento, String conteudoJson) {
         RelatorioEntity relatorio = new RelatorioEntity(nomeEvento, conteudoJson);
         repository.save(relatorio);
-        System.out.println("📊 Evento salvo no relatório: " + nomeEvento);
+        System.out.println("Evento salvo no relatório: " + nomeEvento);
     }
 }

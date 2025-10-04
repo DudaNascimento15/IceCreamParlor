@@ -1,15 +1,9 @@
 package com.IceCreamParlor.consumer;
 
-import com.IceCreamParlor.service.insterfaces.ClienteService;
-import org.springframework.amqp.AmqpRejectAndDontRequeueException;
-import org.springframework.amqp.ImmediateAcknowledgeAmqpException;
-import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Service;
 
-import com.IceCreamParlor.service.ClienteService;
-import com.rabbitmq.client.Envelope;
+import com.IceCreamParlor.service.ClienteServiceImpl;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -17,15 +11,15 @@ import lombok.extern.slf4j.Slf4j;
 
 public class ClienteConsumer {
 
-    private final ClienteService clienteService;
+    private final ClienteServiceImpl clienteService;
 
-    public ClienteConsumer(ClienteService clienteService) {
+    public ClienteConsumer(ClienteServiceImpl clienteService) {
         this.clienteService = clienteService;
     }
 
-    private final  processed;
 
-    @RabbitListener(queues = "q.cliente")
+
+   /* @RabbitListener(queues = "q.cliente")
     public void onCliente(Envelope<ClienteEvt> env) {
         if (processed.existsByMessageId(env.messageId())) return;
         try {
@@ -38,5 +32,5 @@ public class ClienteConsumer {
         } catch (Exception e) {
             throw new ImmediateAcknowledgeAmqpException("poison", e);
         }
-    }
+    }*/
 }

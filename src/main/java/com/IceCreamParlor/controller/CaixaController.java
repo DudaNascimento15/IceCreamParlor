@@ -1,8 +1,7 @@
 package com.IceCreamParlor.controller;
 
-import com.IceCreamParlor.dto.events.CaixaEvents;
 import com.IceCreamParlor.dto.repositories.CaixaRepository;
-import com.IceCreamParlor.service.insterfaces.CaixaService;
+import com.IceCreamParlor.service.CaixaServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -20,7 +19,7 @@ import java.util.UUID;
 public class CaixaController {
 
     private final CaixaRepository caixaRepository;
-    private final CaixaService caixaService;
+    private final CaixaServiceImpl caixaService;
 
 
     @GetMapping("/pagamentos")
@@ -37,8 +36,8 @@ public class CaixaController {
     public void simularPagamento(  @RequestParam UUID pedidoId,
                                    @RequestParam String clienteId,
                                    @RequestParam BigDecimal valorTotal) {
-        CaixaEvents.PagamentoIniciado evento = new CaixaEvents.PagamentoIniciado(pedidoId, clienteId, valorTotal);
-        caixaService.processarPagamento(evento);
+       // CaixaEvents evento = new CaixaEvents(pedidoId, clienteId, valorTotal);
+       // caixaService.processarPagamento(evento);
     }
 
 

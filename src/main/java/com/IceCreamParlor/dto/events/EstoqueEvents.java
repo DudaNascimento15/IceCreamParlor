@@ -5,9 +5,7 @@ import java.util.UUID;
 
 public class EstoqueEvents {
 
-    public record ReservaSolicitada(UUID pedidoId, String clienteId) {}
-
-    public record ReservaConfirmada(UUID pedidoId, String clienteId) {}
+     public record ReservaConfirmada(UUID pedidoId, String clienteId) {}
 
     public record ReservaNegada(UUID pedidoId, String motivo, String clienteId) {}
 

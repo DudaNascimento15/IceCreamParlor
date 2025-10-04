@@ -1,20 +1,13 @@
 package com.IceCreamParlor.consumer;
 
-import com.IceCreamParlor.service.insterfaces.CaixaService;
-import com.rabbitmq.client.Envelope;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.amqp.AmqpRejectAndDontRequeueException;
-import org.springframework.amqp.ImmediateAcknowledgeAmqpException;
-import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Service;
-
-import java.math.BigDecimal;
 
 @Slf4j
 @Service
 public class CaixaConsumer {
 
-    private final CaixaService pedidoService;
+  /*  private final CaixaService pedidoService;
     private final ProcessedEventRepository processed; // tabela message_id único
     private final MessageBus bus;
 
@@ -56,5 +49,5 @@ public class CaixaConsumer {
     private boolean processarPagamento(String pedidoId, BigDecimal valor) {
         // Simule uma chamada externa ao gateway de pagamento
         return Math.random() > 0.2; // 80% de chance de aprovar
-    }
+    }*/
 }

@@ -38,17 +38,18 @@ public class ProducaoEntity {
     public ProducaoEntity(UUID uuid, String emPreparo) {
     }
 
-    protected void Producao() {
-    }
+    public ProducaoEntity() {}
 
-    public void Producao(UUID pedidoId, String status) {
+    public ProducaoEntity(UUID pedidoId, StatusProducaoEnum status) {
         this.pedidoId = pedidoId;
-        this.status = StatusProducaoEnum.valueOf(status);
+        this.status = status;
+        this.iniciadoEm = OffsetDateTime.now();
     }
 
     public void finalizarProducao() {
         this.status = StatusProducaoEnum.PRONTO;
         this.finalizadoEm = OffsetDateTime.now();
     }
+
 
 }

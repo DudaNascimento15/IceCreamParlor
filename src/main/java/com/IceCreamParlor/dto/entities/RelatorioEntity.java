@@ -8,7 +8,7 @@ import java.time.OffsetDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "relatorios")
+@Table(name = "relatorio")
 @Getter
 @Setter
 public class RelatorioEntity {
@@ -26,14 +26,12 @@ public class RelatorioEntity {
     @Column(name = "recebido_em", nullable = false)
     private OffsetDateTime recebidoEm = OffsetDateTime.now();
 
-    public RelatorioEntity(String nomeEvento, String conteudoJson) {
-    }
+    public RelatorioEntity() {}
 
-    protected void Relatorio() {}
-
-    public void Relatorio(String nomeEvento, String conteudo) {
+    public RelatorioEntity(String nomeEvento, String conteudo) {
         this.nomeEvento = nomeEvento;
         this.conteudo = conteudo;
+        this.recebidoEm = OffsetDateTime.now();
     }
 
 }

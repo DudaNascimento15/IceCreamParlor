@@ -6,12 +6,13 @@ import com.IceCreamParlor.dto.repositories.ClienteRepository;
 import org.springframework.stereotype.Service;
 
 import java.sql.SQLOutput;
+import java.time.OffsetDateTime;
 import java.util.UUID;
 
 @Service
 public class ClienteServiceImpl {
 
-    private final ClienteRepository clienteRepository;
+  /*  private final ClienteRepository clienteRepository;
 
     public ClienteServiceImpl(ClienteRepository clienteRepository) {
         this.clienteRepository = clienteRepository;
@@ -33,12 +34,15 @@ public class ClienteServiceImpl {
         salvarNotificacao(UUID.fromString(pedido.clienteId()), pedido.clienteId(), "Seu pedido " + pedido.pedidoId() + " foi entregue, bom apetite!");
     }
 
-    public void salvarNotificacao(UUID pedidoId, String clienteId, String mensagem) {
+    public void registrarNotificacao( cliente) {
+        ClienteEntity notificacao = new NotificacaoEntity();
+        notificacao.(cliente.getPedidoId());
+        notificacao.setClienteId(cliente.getClienteId());
+        notificacao.setMensagem(cliente.getMensagem());
+        notificacao.setCriadoEm(OffsetDateTime.now());
 
-        ClienteEntity clienteEntity = new ClienteEntity(pedidoId, clienteId, mensagem);
-        clienteRepository.save(clienteEntity);
-
-        System.out.println("Notificação salva para o cliente: " + clienteId + " - Mensagem: " + mensagem);
+        notificacaoRepository.save(notificacao);
     }
-    
+
+*/
 }

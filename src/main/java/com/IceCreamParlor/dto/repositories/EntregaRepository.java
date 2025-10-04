@@ -6,11 +6,11 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Repository
 public interface EntregaRepository extends JpaRepository<EntregaEntity, UUID> {
 
-    List<ClienteEntity> findByPedidoId(UUID pedidoId);
-    List<ClienteEntity> findByClienteId(String clienteId);
+    Optional<EntregaEntity> findByPedidoId(UUID pedidoId);
 }

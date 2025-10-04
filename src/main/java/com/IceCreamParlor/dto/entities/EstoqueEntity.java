@@ -2,13 +2,18 @@ package com.IceCreamParlor.dto.entities;
 
 import com.IceCreamParlor.dto.enums.StatusEstoqueEnum;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
 @Entity
 @Table(name = "estoque_reservas")
+@Getter
+@Setter
 public class EstoqueEntity {
+
 
     @Id
     @Column(name = "pedido_id")
@@ -24,39 +29,19 @@ public class EstoqueEntity {
     @Column(name = "criado_em", nullable = false)
     private OffsetDateTime criadoEm = OffsetDateTime.now();
 
-    public EstoqueEntity(UUID uuid, String confirmada, Object o) {
-    }
+    public EstoqueEntity() {}
 
-    protected void EntregaEntity() {}
-
-    public void EntregaEntity(UUID pedidoId, String status, String motivo) {
+    public EstoqueEntity(UUID pedidoId, StatusEstoqueEnum status, String motivo) {
         this.pedidoId = pedidoId;
-        this.status = StatusEstoqueEnum.valueOf(status);
-        this.motivo = motivo;
-    }
-
-    public UUID getPedidoId() {
-        return pedidoId;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public String getMotivo() {
-        return motivo;
-    }
-
-    public OffsetDateTime getCriadoEm() {
-        return criadoEm;
-    }
-
-    public void setStatus(String status) {
         this.status = status;
+        this.motivo = motivo;
+        this.criadoEm = OffsetDateTime.now();
     }
 
-    public void setMotivo(String motivo) {
-        this.motivo = motivo;
+    public EstoqueEntity(UUID pedidoId, StatusEstoqueEnum status) {
+        this(pedidoId, status, null);
     }
+
+
 }
 

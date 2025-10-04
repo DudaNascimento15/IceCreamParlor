@@ -1,13 +1,11 @@
 package com.IceCreamParlor.controller;
 
-import com.IceCreamParlor.service.insterfaces.WorkflowService;
+import com.IceCreamParlor.service.WorkflowServiceImpl;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.math.BigDecimal;
@@ -19,7 +17,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 class WorkflowController {
 
-    private final WorkflowService relatorioService;
+    private final WorkflowServiceImpl relatorioService;
 
     @PostMapping("/pedidos")
     Map<String, Object> iniciar (@RequestParam String clienteId,

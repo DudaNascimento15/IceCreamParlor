@@ -1,6 +1,6 @@
 package com.IceCreamParlor.consumer;
 
-import com.IceCreamParlor.service.insterfaces.RelatorioService;
+import com.IceCreamParlor.service.RelatorioServiceImpl;
 import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.amqp.ImmediateAcknowledgeAmqpException;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -16,7 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class RelatorioConsumer {
 
-    private final RelatorioService relatorioService;
+    private final RelatorioServiceImpl relatorioService;
     private final ProcessedEventRepository processed;
 
     @RabbitListener(queues = "q.relatorio")

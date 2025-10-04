@@ -16,7 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @RequiredArgsConstructor
 public class EntregasConsumer {
-
+/*
     private final EntregasServiceImpl entregaService;
     private final ProcessedEventRepository processed;
     private final MessageBus bus;
@@ -55,5 +55,5 @@ public class EntregasConsumer {
             // envenenada → q.entregas.dlq
             throw new ImmediateAcknowledgeAmqpException("poison", e);
         }
-    }
+    }*/
 }
