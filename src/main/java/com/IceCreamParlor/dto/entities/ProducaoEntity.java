@@ -3,16 +3,10 @@ package com.IceCreamParlor.dto.entities;
 import com.IceCreamParlor.dto.enums.StatusProducaoEnum;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Table;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.UuidGenerator;
-import org.springframework.data.annotation.Id;
+import jakarta.persistence.Id;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;
@@ -21,20 +15,17 @@ import java.util.UUID;
 @Table(name = "producao")
 @Getter
 @Setter
-@RequiredArgsConstructor
 public class ProducaoEntity {
 
     @Id
-    @UuidGenerator               // Hibernate 6 – gera UUID no Java
     @Column(name = "id", nullable = false, columnDefinition = "uuid")
     private UUID id;
 
-    @Column(name = "pedido_id")
+    @Column(name = "pedido_id", nullable = false, columnDefinition = "uuid")
     private UUID pedidoId;
 
-    @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
-    private StatusProducaoEnum status;
+    @Column(name = "status", nullable = false, length = 20)
+    private String status;
 
     @Column(name = "iniciado_em", nullable = false)
     private OffsetDateTime iniciadoEm = OffsetDateTime.now();
@@ -42,18 +33,17 @@ public class ProducaoEntity {
     @Column(name = "finalizado_em")
     private OffsetDateTime finalizadoEm;
 
-    public ProducaoEntity(UUID uuid, String emPreparo) {
+    public ProducaoEntity() {
     }
 
-
-    public ProducaoEntity(UUID pedidoId, StatusProducaoEnum status) {
+    public ProducaoEntity(UUID pedidoId, String status) {
         this.pedidoId = pedidoId;
         this.status = status;
         this.iniciadoEm = OffsetDateTime.now();
     }
 
     public void finalizarProducao() {
-        this.status = StatusProducaoEnum.PRONTO;
+        this.status = StatusProducaoEnum.PRONTO.toString();
         this.finalizadoEm = OffsetDateTime.now();
     }
 

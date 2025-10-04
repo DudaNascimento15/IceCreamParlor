@@ -1,10 +1,11 @@
 package com.IceCreamParlor.dto.entities;
 
-import com.IceCreamParlor.dto.enums.StatusEstoqueEnum;
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.UuidGenerator;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;
@@ -16,34 +17,36 @@ import java.util.UUID;
 public class EstoqueEntity {
 
     @Id
-    @UuidGenerator               // Hibernate 6 – gera UUID no Java
     @Column(name = "id", nullable = false, columnDefinition = "uuid")
     private UUID id;
 
-    @Column(name = "pedido_id")
+    @Column(name = "pedido_id", nullable = false, columnDefinition = "uuid")
     private UUID pedidoId;
 
-    @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
-    private StatusEstoqueEnum status; // CONFIRMADA, NEGADA
+    @Column(name = "itens_reservados", nullable = false)
+    private Boolean itensReservados;
 
-    @Column(name = "motivo")
-    private String motivo; // opcional, só se negado
+    @Column(name = "status", nullable = false, length = 20)
+    private String status;
 
-    @Column(name = "criado_em", nullable = false)
-    private OffsetDateTime criadoEm = OffsetDateTime.now();
+    @Column(name = "motivo", length = 255)
+    private String motivo;
 
-    public EstoqueEntity() {}
+    @Column(name = "reservado_em", nullable = false)
+    private OffsetDateTime reservadoEm = OffsetDateTime.now();
 
-    public EstoqueEntity(UUID pedidoId, StatusEstoqueEnum status, String motivo) {
+    public EstoqueEntity() {
+    }
+
+    public EstoqueEntity(UUID pedidoId, String status, String motivo) {
         this.pedidoId = pedidoId;
         this.status = status;
         this.motivo = motivo;
-        this.criadoEm = OffsetDateTime.now();
+        this.reservadoEm = OffsetDateTime.now();
     }
 
-    public EstoqueEntity(UUID pedidoId, StatusEstoqueEnum status) {
-        this(pedidoId, status, null);
+    public EstoqueEntity(UUID pedidoId, String status) {
+        this(pedidoId, String.valueOf(status), null);
     }
 
 

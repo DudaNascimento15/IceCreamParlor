@@ -29,7 +29,7 @@ public class EstoqueServiceImpl {
         if (sucesso) {
             var reserva = new EstoqueEntity(
                 evento.pedidoId(),
-                StatusEstoqueEnum.CONFIRMADO
+                StatusEstoqueEnum.CONFIRMADO.toString()
             );
             repository.save(reserva);
             EstoqueEvents.ReservaConfirmada confirmada =
@@ -42,7 +42,7 @@ public class EstoqueServiceImpl {
             var motivo = "Sem estoque suficiente";
             var reserva = new EstoqueEntity(
                 evento.pedidoId(),
-                StatusEstoqueEnum.NEGADO,
+                StatusEstoqueEnum.NEGADO.toString(),
                 motivo
             );
             repository.save(reserva);

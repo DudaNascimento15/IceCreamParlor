@@ -60,7 +60,6 @@ public class RabbitMqConfig {
         return new DirectExchange(EXCHANGE_DLX, true, false);
     }
 
-    // ===== Helpers =====
     private static Queue mainQueue(String name) {
         // manda falhas para o DLX com routing-key "<servico>.dead"
         String deadRouting = name.replace("q.", "").replace(".retry", "").replace(".dlq", "") + ".dead";
@@ -116,7 +115,7 @@ public class RabbitMqConfig {
 
     @Bean
     Binding bWorkflowRetry(TopicExchange sorvExchange) {
-        return bindMain(qWorkflowRetry(), sorvExchange, "workflow.retry");
+        return bindMain(qWorkflowRetry(), sorvExchange, "q.workflow.retry");
     }
 
     @Bean
@@ -147,7 +146,7 @@ public class RabbitMqConfig {
 
     @Bean
     Binding bCaixaRetry(TopicExchange ex) {
-        return bindMain(qCaixaRetry(), ex, "caixa.retry");
+        return bindMain(qCaixaRetry(), ex, "q.caixa.retry");
     }
 
     @Bean
@@ -178,7 +177,7 @@ public class RabbitMqConfig {
 
     @Bean
     Binding bEstoqueRetry(TopicExchange ex) {
-        return bindMain(qEstoqueRetry(), ex, "estoque.retry");
+        return bindMain(qEstoqueRetry(), ex, "q.estoque.retry");
     }
 
     @Bean
@@ -209,7 +208,7 @@ public class RabbitMqConfig {
 
     @Bean
     Binding bProducaoRetry(TopicExchange ex) {
-        return bindMain(qProducaoRetry(), ex, "producao.retry");
+        return bindMain(qProducaoRetry(), ex, "q.producao.retry");
     }
 
     @Bean
@@ -240,7 +239,7 @@ public class RabbitMqConfig {
 
     @Bean
     Binding bEntregasRetry(TopicExchange ex) {
-        return bindMain(qEntregasRetry(), ex, "entregas.retry");
+        return bindMain(qEntregasRetry(), ex, "q.entregas.retry");
     }
 
     @Bean
@@ -271,7 +270,7 @@ public class RabbitMqConfig {
 
     @Bean
     Binding bClienteRetry(TopicExchange ex) {
-        return bindMain(qClienteRetry(), ex, "cliente.retry");
+        return bindMain(qClienteRetry(), ex, "q.cliente.retry");
     }
 
     @Bean
@@ -302,7 +301,7 @@ public class RabbitMqConfig {
 
     @Bean
     Binding bRelatorioRetry(TopicExchange ex) {
-        return bindMain(qRelatorioRetry(), ex, "relatorio.retry");
+        return bindMain(qRelatorioRetry(), ex, "q.relatorio.retry");
     }
 
     @Bean

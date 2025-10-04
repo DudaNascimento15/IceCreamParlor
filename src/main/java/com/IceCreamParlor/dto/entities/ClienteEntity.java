@@ -2,12 +2,10 @@ package com.IceCreamParlor.dto.entities;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.Getter;
-import org.hibernate.annotations.UuidGenerator;
-import org.springframework.data.annotation.Id;
+import lombok.Setter;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;
@@ -15,26 +13,28 @@ import java.util.UUID;
 @Entity
 @Table(name = "cliente")
 @Getter
+@Setter
+
 public class ClienteEntity {
 
     @Id
-    @UuidGenerator               // Hibernate 6 – gera UUID no Java
     @Column(name = "id", nullable = false, columnDefinition = "uuid")
     private UUID id;
 
-    @Column(name = "pedido_id", nullable = false)
+    @Column(name = "pedido_id", nullable = false, columnDefinition = "uuid")
     private UUID pedidoId;
 
-    @Column(name = "cliente_id", nullable = false)
+    @Column(name = "cliente_id", nullable = false, length = 50)
     private String clienteId;
 
-    @Column(nullable = false)
+    @Column(name = "mensagem", nullable = false, length = 255)
     private String mensagem;
 
     @Column(name = "criado_em", nullable = false)
     private OffsetDateTime criadoEm = OffsetDateTime.now();
 
-    protected ClienteEntity() {}
+    public ClienteEntity() {
+    }
 
     public ClienteEntity(UUID pedidoId, String clienteId, String mensagem) {
         this.pedidoId = pedidoId;
@@ -42,5 +42,4 @@ public class ClienteEntity {
         this.mensagem = mensagem;
         this.criadoEm = OffsetDateTime.now();
     }
-
 }

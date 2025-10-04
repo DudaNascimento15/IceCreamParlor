@@ -1,18 +1,28 @@
 spring:
-  rabbitmq:
-    addresses: amqps://kmskovrf:9ulQT4f0BTIwr3xbnT4D6jJ95Dk3VRho@jackal.rmq.cloudamqp.com/kmskovrf
-    username: kmskovrf
-    password: 9ulQT4f0BTIwr3xbnT4D6jJ95Dk3VRho
-    virtual-host: kmskovrf
   datasource:
     url: jdbc:postgresql://localhost:5432/sorveteria
     username: icecream_user
     password: admin
     driver-class-name: org.postgresql.Driver
+
   jpa:
     hibernate:
-      ddl-auto: none
-    show-sql: true
+      ddl-auto: validate
+    show-sql: false
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+
   flyway:
-     enabled: true
-     locations: classpath:db/migration
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+    validate-on-migrate: true
+
+  docker:
+    compose:
+      enabled: false
+
+  rabbitmq:
+    uri: amqps://kmskovrf:Ei9fF3bR2B6P_7_R_vaxARNfCXkKqj1d@jackal.rmq.cloudamqp.com/kmskovrf

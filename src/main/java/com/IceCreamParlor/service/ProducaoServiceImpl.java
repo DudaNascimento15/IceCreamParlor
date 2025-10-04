@@ -26,7 +26,7 @@ public class ProducaoServiceImpl {
         ProducaoEntity producao =
             new ProducaoEntity(
                 evento.pedidoId(),
-                StatusProducaoEnum.EM_PREPARO
+                StatusProducaoEnum.EM_PREPARO.toString()
             );
 
         repository.save(producao);

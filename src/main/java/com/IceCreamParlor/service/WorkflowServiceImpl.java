@@ -65,8 +65,8 @@ public class WorkflowServiceImpl {
     @Transactional
     public void pagamentoAprovado(UUID pedidoId, String usuario) {
         log.warn(" Pagamento aprovado - pedidoId: {}", pedidoId);
-        var s = sagaStateRepository.findById(pedidoId).orElseThrow();
-        s.setPagamentoAprovado(true);
+        final var s = sagaStateRepository.findById(pedidoId).orElseThrow();
+        s.setPagamentoOk(true);
         sagaStateRepository.save(s);
         tentaConfirmar(s, usuario);
     }
@@ -79,7 +79,7 @@ public class WorkflowServiceImpl {
         log.info("Reserva confirmada - pedidoId: {}", pedidoId);
 
         var s = sagaStateRepository.findById(pedidoId).orElseThrow();
-        s.setEstoqueReservado(true);
+        s.setEstoqueOk(true);
         sagaStateRepository.save(s);
         tentaConfirmar(s, usuario);
     }
@@ -94,19 +94,19 @@ public class WorkflowServiceImpl {
     ;
 
     public void tentaConfirmar(WorkflowEntity workflowEntity, String usuario) {
-        if (workflowEntity.isPagamentoAprovado() && workflowEntity.isEstoqueReservado()) {
+        if (workflowEntity.getPagamentoOk() && workflowEntity.getEstoqueOk()) {
             publish("pedidos.pedido.confirmado",
                 new WorkflowEvents.PedidoConfirmado(
                     workflowEntity.getPedidoId(),
                     workflowEntity.getClienteId(),
-                    workflowEntity.getValorTotal()
+                    workflowEntity.getTotal()
                 ), workflowEntity.getPedidoId().toString(), usuario);
 
         } else {
-            log.debug("⏳ Aguardando confirmações - pedidoId: {}, pagamento: {}, estoque: {}",
+            log.debug("Aguardando confirmações - pedidoId: {}, pagamento: {}, estoque: {}",
                 workflowEntity.getPedidoId(),
-                workflowEntity.isPagamentoAprovado(),
-                workflowEntity.isEstoqueReservado());
+                workflowEntity.getPagamentoOk(),
+                workflowEntity.getEstoqueOk());
         }
     }
 

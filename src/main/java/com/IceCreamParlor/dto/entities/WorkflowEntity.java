@@ -2,13 +2,10 @@ package com.IceCreamParlor.dto.entities;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.UuidGenerator;
+import jakarta.persistence.Id;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
@@ -21,27 +18,30 @@ import java.util.UUID;
 public class WorkflowEntity {
 
     @Id
-    @UuidGenerator               // Hibernate 6 – gera UUID no Java
     @Column(name = "id", nullable = false, columnDefinition = "uuid")
     private UUID id;
 
-    @Column(name = "pedido_id", columnDefinition = "uuid", nullable = false)
+    @Column(name = "pedido_id", nullable = false, columnDefinition = "uuid")
     private UUID pedidoId;
 
-    @Column(name = "cliente_id", columnDefinition = "uuid", nullable = false)
+    @Column(name = "cliente_id", nullable = false, length = 100)
     private String clienteId;
 
-    @Column(name = "valor_total", precision = 14, scale = 2)
-    private BigDecimal valorTotal;
+    @Column(nullable = false, precision = 14, scale = 2)
+    private BigDecimal total;
 
-    @Column(name = "pagamento_aprovado", columnDefinition = "boolean")
-    private boolean pagamentoAprovado;
+    @Column(nullable = false, length = 20)
+    private String status;
 
-    @Column(name = "estoque_Reservado", columnDefinition = "boolean")
-    private boolean estoqueReservado;
+    @Column(name = "pagamento_ok")
+    private Boolean pagamentoOk;
 
-    @Column(name = "criado_em", columnDefinition = "timestamp with time zone", nullable = false)
-    private OffsetDateTime criadoEm = OffsetDateTime.now();
+    @Column(name = "estoque_ok")
+    private Boolean estoqueOk;
+
+    @Column(name = "confirmado_em")
+    private OffsetDateTime confirmadoEm;
+
 
     protected WorkflowEntity() {
     }
@@ -51,8 +51,7 @@ public class WorkflowEntity {
     public WorkflowEntity(UUID pedidoId, String clienteId, BigDecimal valorTotal) {
         this.pedidoId = pedidoId;
         this.clienteId = clienteId;
-        this.valorTotal = valorTotal;
-
+        this.total = valorTotal;
     }
 
 }

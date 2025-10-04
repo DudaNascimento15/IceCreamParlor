@@ -3,15 +3,11 @@ package com.IceCreamParlor.dto.entities;
 import com.IceCreamParlor.dto.enums.StatusEntregaEnum;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.UuidGenerator;
-import org.springframework.data.annotation.Id;
+import jakarta.persistence.Id;
+
 
 import java.time.OffsetDateTime;
 import java.util.UUID;
@@ -23,36 +19,35 @@ import java.util.UUID;
 public class EntregaEntity {
 
     @Id
-    @UuidGenerator               // Hibernate 6 – gera UUID no Java
     @Column(name = "id", nullable = false, columnDefinition = "uuid")
     private UUID id;
 
-    @Column(name = "pedido_id")
+    @Column(name = "pedido_id", nullable = false, columnDefinition = "uuid")
     private UUID pedidoId;
 
-    @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
-    private StatusEntregaEnum status;
+    @Column(name = "status", nullable = false, length = 50)
+    private String status;
 
-    @Column(name = "atualizado_em", nullable = false)
-    private OffsetDateTime atualizadoEm = OffsetDateTime.now();
+    @Column(name = "criado_em", nullable = false)
+    private OffsetDateTime criadoEm = OffsetDateTime.now();
 
-    public EntregaEntity() {}
+    public EntregaEntity() {
+    }
 
     public EntregaEntity(String pedidoId, StatusEntregaEnum status) {
         this.pedidoId = UUID.fromString(pedidoId);
-        this.status = status;
-        this.atualizadoEm = OffsetDateTime.now();
+        this.status = status.toString();
+        this.criadoEm = OffsetDateTime.now();
     }
 
     public EntregaEntity(UUID pedidoId, StatusEntregaEnum status) {
         this.pedidoId = pedidoId;
-        this.status = status;
-        this.atualizadoEm = OffsetDateTime.now();
+        this.status = status.toString();
+        this.criadoEm = OffsetDateTime.now();
     }
 
     public void atualizarStatus(StatusEntregaEnum novoStatus) {
-        this.status = novoStatus;
-        this.atualizadoEm = OffsetDateTime.now();
+        this.status = novoStatus.toString();
+        this.criadoEm = OffsetDateTime.now();
     }
 }

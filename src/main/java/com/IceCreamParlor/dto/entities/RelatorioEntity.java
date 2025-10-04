@@ -1,10 +1,11 @@
 package com.IceCreamParlor.dto.entities;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.UuidGenerator;
-import org.springframework.data.annotation.Id;
+import jakarta.persistence.Id;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;
@@ -16,25 +17,32 @@ import java.util.UUID;
 public class RelatorioEntity {
 
     @Id
-    @UuidGenerator               // Hibernate 6 – gera UUID no Java
     @Column(name = "id", nullable = false, columnDefinition = "uuid")
     private UUID id;
 
-    @Column(name = "nome_evento", nullable = false)
-    private String nomeEvento;
+    @Column(name = "pedido_id", columnDefinition = "uuid")
+    private UUID pedidoId;
 
-    @Column(name = "conteudo", columnDefinition = "TEXT", nullable = false)
-    private String conteudo;
+    @Column(name = "origem", length = 50)
+    private String origem;
 
-    @Column(name = "recebido_em", nullable = false)
-    private OffsetDateTime recebidoEm = OffsetDateTime.now();
+    @Column(name = "evento", length = 100)
+    private String evento;
 
-    public RelatorioEntity() {}
+    @Column(name = "payload", columnDefinition = "jsonb")
+    private String payload;
 
-    public RelatorioEntity(String nomeEvento, String conteudo) {
-        this.nomeEvento = nomeEvento;
-        this.conteudo = conteudo;
-        this.recebidoEm = OffsetDateTime.now();
+    @Column(name = "criado_em", nullable = false)
+    private OffsetDateTime criadoEm = OffsetDateTime.now();
+
+    public RelatorioEntity() {
+    }
+
+
+    public RelatorioEntity(String evento, String payload) {
+        this.evento = evento;
+        this.payload = payload;
+        this.criadoEm = OffsetDateTime.now();
     }
 
 }

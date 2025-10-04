@@ -1,4 +1,3 @@
-
 package com.IceCreamParlor;
 
 import org.springframework.boot.SpringApplication;
