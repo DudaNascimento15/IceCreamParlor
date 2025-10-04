@@ -1,12 +1,14 @@
 package com.IceCreamParlor.consumer;
 
-import com.IceCreamParlor.dto.events.WorkflowEvents;
 import com.IceCreamParlor.dto.events.ProducaoEvents;
+import com.IceCreamParlor.dto.events.WorkflowEvents;
 import com.IceCreamParlor.service.ProducaoServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.messaging.handler.annotation.Headers;
+import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -22,7 +24,16 @@ public class ProducaoConsumer {
         this.producaoService = producaoService;
     }
 
-    @RabbitListener(queues = "q.producao.pedido.confirmado", containerFactory = "rabbitListenerContainerFactory")
+    @RabbitListener(queues = "q.producao", containerFactory = "rabbitListenerContainerFactory")
+    public void onMessage(Message message, @Payload Object evento, @Headers Map<String, Object> headers) {
+        String routingKey = message.getMessageProperties().getReceivedRoutingKey();
+        if ("pedidos.pedido.confirmado".equals(routingKey) && evento instanceof WorkflowEvents.PedidoConfirmado) {
+            onPedidoConfirmado((WorkflowEvents.PedidoConfirmado) evento);
+        } else if ("pedidos.pedido.pronto".equals(routingKey) && evento instanceof ProducaoEvents.PedidoPronto) {
+            onPedidoPronto((ProducaoEvents.PedidoPronto) evento);
+        }
+    }
+
     public void onPedidoConfirmado(WorkflowEvents.PedidoConfirmado evento) {
         try {
             log.info("Pedido confirmado para produção: {}", evento.pedidoId());
@@ -33,7 +44,6 @@ public class ProducaoConsumer {
         }
     }
 
-    @RabbitListener(queues = "q.producao.pedido.pronto", containerFactory = "rabbitListenerContainerFactory")
     public void onPedidoPronto(ProducaoEvents.PedidoPronto evento) {
         try {
             log.info("Pedido pronto para cliente: {}", evento.clienteId());
@@ -48,7 +58,6 @@ public class ProducaoConsumer {
     public void handleProducaoDlq(Object evento, Message message) {
         String reason = extractDeathReason(message);
         log.warn("Mensagem em DLQ de Produção - Evento: {}, Razão: {} (TTL expired? {})", evento, reason, "expired".equals(reason));
-        // Ação: producaoService.salvarParaAuditoria(evento, reason);
     }
 
     private String extractDeathReason(Message message) {

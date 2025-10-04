@@ -6,6 +6,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.messaging.handler.annotation.Headers;
+import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -21,7 +23,20 @@ public class ClienteConsumer {
         this.clienteService = clienteService;
     }
 
-    @RabbitListener(queues = "q.cliente.pedido.pronto", containerFactory = "rabbitListenerContainerFactory")
+    @RabbitListener(queues = "q.cliente", containerFactory = "rabbitListenerContainerFactory")
+    public void onMessage(Message message, @Payload Object evento, @Headers Map<String, Object> headers) {
+        String routingKey = message.getMessageProperties().getReceivedRoutingKey();
+        if ("cliente.pedido.pronto".equals(routingKey) && evento instanceof ClienteEvents.PedidoPronto) {
+            onPedidoPronto((ClienteEvents.PedidoPronto) evento);
+        } else if ("cliente.pedido.despachado".equals(routingKey) && evento instanceof ClienteEvents.PedidoDespachado) {
+            onPedidoDespachado((ClienteEvents.PedidoDespachado) evento);
+        } else if ("cliente.pedido.a_caminho".equals(routingKey) && evento instanceof ClienteEvents.PedidoACaminho) {
+            onPedidoACaminho((ClienteEvents.PedidoACaminho) evento);
+        } else if ("cliente.pedido.entregue".equals(routingKey) && evento instanceof ClienteEvents.PedidoEntregue) {
+            onPedidoEntregue((ClienteEvents.PedidoEntregue) evento);
+        }
+    }
+
     public void onPedidoPronto(ClienteEvents.PedidoPronto evento) {
         try {
             log.info("Recebida notificação de pedido pronto para cliente: {}", evento.clienteId());
@@ -32,7 +47,6 @@ public class ClienteConsumer {
         }
     }
 
-    @RabbitListener(queues = "q.cliente.pedido.despachado", containerFactory = "rabbitListenerContainerFactory")
     public void onPedidoDespachado(ClienteEvents.PedidoDespachado evento) {
         try {
             log.info("Recebida notificação de pedido despachado para cliente: {}", evento.clienteId());
@@ -43,7 +57,6 @@ public class ClienteConsumer {
         }
     }
 
-    @RabbitListener(queues = "q.cliente.pedido.a_caminho", containerFactory = "rabbitListenerContainerFactory")
     public void onPedidoACaminho(ClienteEvents.PedidoACaminho evento) {
         try {
             log.info("Recebida notificação de pedido a caminho para cliente: {}", evento.clienteId());
@@ -54,7 +67,6 @@ public class ClienteConsumer {
         }
     }
 
-    @RabbitListener(queues = "q.cliente.pedido.entregue", containerFactory = "rabbitListenerContainerFactory")
     public void onPedidoEntregue(ClienteEvents.PedidoEntregue evento) {
         try {
             log.info("Recebida notificação de pedido entregue para cliente: {}", evento.clienteId());
@@ -69,7 +81,6 @@ public class ClienteConsumer {
     public void handleClienteDlq(Object evento, Message message) {
         String reason = extractDeathReason(message);
         log.warn("Mensagem em DLQ de Cliente - Evento: {}, Razão: {} (TTL expired? {})", evento, reason, "expired".equals(reason));
-        // Ação: clienteService.salvarParaAuditoria(evento, reason);
     }
 
     private String extractDeathReason(Message message) {
