@@ -37,7 +37,7 @@ public class CaixaConsumer {
     public void onPagamentoAprovado(CaixaEvents.PagamentoAprovado evento) {
         try {
             log.info("Pagamento aprovado para pedido: {}", evento.pedidoId());
-            // Implementar ação se necessário
+             caixaService.simularAprovacao()
         } catch (Exception e) {
             log.error("Erro processando pagamento aprovado para pedido {}: {}", evento.pedidoId(), e.getMessage());
             throw new AmqpRejectAndDontRequeueException("Falha no processamento de pagamento aprovado", e);
@@ -48,7 +48,6 @@ public class CaixaConsumer {
     public void onPagamentoNegado(CaixaEvents.PagamentoNegado evento) {
         try {
             log.info("Pagamento negado para pedido: {}", evento.pedidoId());
-            // Implementar ação se necessário
         } catch (Exception e) {
             log.error("Erro processando pagamento negado para pedido {}: {}", evento.pedidoId(), e.getMessage());
             throw new AmqpRejectAndDontRequeueException("Falha no processamento de pagamento negado", e);

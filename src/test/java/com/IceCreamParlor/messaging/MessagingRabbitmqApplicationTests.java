@@ -1,4 +1,4 @@
-package com.IceCreamParlor.messaging_rabbitmq;
+package com.IceCreamParlor.messaging;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

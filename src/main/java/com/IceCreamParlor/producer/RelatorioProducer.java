@@ -2,7 +2,7 @@ package com.IceCreamParlor.producer;
 
 import com.IceCreamParlor.dto.entities.RelatorioEntity;
 import com.IceCreamParlor.dto.repositories.RelatorioRepository;
-import com.IceCreamParlor.messaging_rabbitmq.MessagingRabbitmqApplication;
+import com.IceCreamParlor.messaging.MessagingRabbitmqApplication;
 import org.springframework.stereotype.Service;
 
 @Service

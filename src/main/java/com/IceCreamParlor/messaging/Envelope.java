@@ -1,4 +1,4 @@
-package com.IceCreamParlor.messaging_rabbitmq;
+package com.IceCreamParlor.messaging;
 
 import java.time.Instant;
 

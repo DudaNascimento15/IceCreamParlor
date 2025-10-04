@@ -1,7 +1,7 @@
 package com.IceCreamParlor.producer;
 
 import com.IceCreamParlor.dto.events.ClienteEvents;
-import com.IceCreamParlor.messaging_rabbitmq.MessagingRabbitmqApplication;
+import com.IceCreamParlor.messaging.MessagingRabbitmqApplication;
 import org.springframework.stereotype.Service;
 
 @Service

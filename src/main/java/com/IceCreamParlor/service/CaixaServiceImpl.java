@@ -33,7 +33,6 @@ public class CaixaServiceImpl {
         return new Random().nextDouble() < 0.7;
     }
 
-    @Override
     @Transactional
     public void processarPagamento(WorkflowEvents.PagamentoIniciado evento, String correlationId, String usuario) {
         log.info("Processando pagamento para o pedido: " + evento.pedidoId());

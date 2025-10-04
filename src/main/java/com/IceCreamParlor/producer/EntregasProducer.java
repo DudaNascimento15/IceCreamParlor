@@ -1,13 +1,22 @@
 package com.IceCreamParlor.producer;
 
 import com.IceCreamParlor.dto.events.EntregaEvents;
-import com.IceCreamParlor.messaging_rabbitmq.MessagingRabbitmqApplication;
+import com.IceCreamParlor.messaging.EventPublisher;
+import com.IceCreamParlor.messaging.MessagingRabbitmqApplication;
 import org.springframework.stereotype.Service;
 
 @Service
 public class EntregasProducer {
+
+
+    private final EventPublisher EventPublisher;
+
+    public EntregasProducer(EventPublisher eventPublisher) {
+        EventPublisher = eventPublisher;
+    }
+
     public void publishPedidoDespachado(EntregaEvents.PedidoDespachado evento, String correlationId, String usuario) {
-        MessagingRabbitmqApplication.publish("entregas.pedido.despachado", evento, correlationId, usuario);
+        EventPublisher.publish("entregas.pedido.despachado", evento, correlationId, usuario);
     }
 
     public void publishPedidoACaminho(EntregaEvents.PedidoACaminho evento, String correlationId, String usuario) {
