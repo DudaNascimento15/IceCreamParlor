@@ -77,10 +77,12 @@ public class ClienteConsumer {
         }
     }
 
-    @RabbitListener(queues = {"q.cliente.pedido.pronto.dlq", "q.cliente.pedido.despachado.dlq", "q.cliente.pedido.a_caminho.dlq", "q.cliente.pedido.entregue.dlq"}, containerFactory = "rabbitListenerContainerFactory")
+    @RabbitListener(queues = "q.cliente.dlq", containerFactory = "rabbitListenerContainerFactory")
     public void handleClienteDlq(Object evento, Message message) {
         String reason = extractDeathReason(message);
-        log.warn("Mensagem em DLQ de Cliente - Evento: {}, Razão: {} (TTL expired? {})", evento, reason, "expired".equals(reason));
+        String routingKey = message.getMessageProperties().getReceivedRoutingKey();
+        log.warn("Mensagem em DLQ de Cliente - Routing Key: {}, Evento: {}, Razão: {}",
+            routingKey, evento, reason);
     }
 
     private String extractDeathReason(Message message) {

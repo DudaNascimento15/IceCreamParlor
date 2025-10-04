@@ -41,17 +41,18 @@ public class RelatorioConsumer {
         }
     }
 
-    @RabbitListener(queues = "q.relatorio.evento.recebido.dlq", containerFactory = "rabbitListenerContainerFactory")
+    @RabbitListener(queues = "q.relatorio.dlq", containerFactory = "rabbitListenerContainerFactory")
     public void handleRelatorioDlq(RelatorioEvents.EventoRecebido evento, Message message) {
         String reason = extractDeathReason(message);
-        log.warn("Mensagem em DLQ de Relatório - Evento: {}, Razão: {} (TTL expired? {})", evento.nomeEvento(), reason,
-                "expired".equals(reason));
+        String routingKey = message.getMessageProperties().getReceivedRoutingKey();
+        log.warn("Mensagem em DLQ de Relatório - Routing Key: {}, Evento: {}, Razão: {}",
+            routingKey, evento != null ? evento.nomeEvento() : "null", reason);
     }
 
     private String extractDeathReason(Message message) {
         @SuppressWarnings("unchecked")
         List<Map<String, Object>> xDeath = (List<Map<String, Object>>) message.getMessageProperties().getHeaders()
-                .get("x-death");
+            .get("x-death");
         return xDeath != null && !xDeath.isEmpty() ? (String) xDeath.get(0).get("reason") : "unknown";
     }
 }

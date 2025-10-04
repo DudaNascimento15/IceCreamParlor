@@ -6,8 +6,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.Map;
 
-import static com.IceCreamParlor.RabbitMqConfig.EXCHANGE_MAIN;
-
 @Component
 public class EventPublisher {
 
@@ -21,10 +19,10 @@ public class EventPublisher {
             msg.getMessageProperties().setContentType("application/json");
             return msg;
         };
-        template.convertAndSend(EXCHANGE_MAIN, routingKey, payload, mpp);
+        template.convertAndSend("sorv.ex", routingKey, payload, mpp);
     }
 
     public void publishRetry(String retryRoutingKey, Object payload) {
-        template.convertAndSend(EXCHANGE_MAIN, retryRoutingKey, payload);
+        template.convertAndSend("sorv.ex", retryRoutingKey, payload);
     }
 }

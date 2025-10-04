@@ -40,10 +40,9 @@ public class CaixaConsumer {
     public void onPagamentoIniciado(CaixaEvents.PagamentoIniciado evento) {
         try {
             log.info("Pagamento iniciado para pedido: {}", evento.pedidoId());
-            // Ajuste para usar os campos disponíveis
             caixaService.processarPagamento(
-                    new WorkflowEvents.PagamentoIniciado(evento.pedidoId(), evento.clientId(), BigDecimal.ZERO),
-                    evento.pedidoId().toString(), evento.clientId());
+                new WorkflowEvents.PagamentoIniciado(evento.pedidoId(), evento.clientId(), BigDecimal.ZERO),
+                evento.pedidoId().toString(), evento.clientId());
         } catch (Exception e) {
             log.error("Erro processando pagamento iniciado para pedido {}: {}", evento.pedidoId(), e.getMessage());
             throw new AmqpRejectAndDontRequeueException("Falha no processamento de pagamento iniciado", e);
@@ -54,8 +53,8 @@ public class CaixaConsumer {
         try {
             log.info("Pagamento aprovado para pedido: {}", evento.pedidoId());
             caixaService.processarPagamento(
-                    new WorkflowEvents.PagamentoIniciado(evento.pedidoId(), evento.clientId(), evento.valor()),
-                    evento.pedidoId().toString(), evento.clientId());
+                new WorkflowEvents.PagamentoIniciado(evento.pedidoId(), evento.clientId(), evento.valor()),
+                evento.pedidoId().toString(), evento.clientId());
         } catch (Exception e) {
             log.error("Erro processando pagamento aprovado para pedido {}: {}", evento.pedidoId(), e.getMessage());
             throw new AmqpRejectAndDontRequeueException("Falha no processamento de pagamento aprovado", e);
@@ -71,18 +70,18 @@ public class CaixaConsumer {
         }
     }
 
-    @RabbitListener(queues = { "q.caixa.pagamento.iniciado.dlq", "q.caixa.pagamento.aprovado.dlq",
-            "q.caixa.pagamento.negado.dlq" }, containerFactory = "rabbitListenerContainerFactory")
+    @RabbitListener(queues = "q.caixa.dlq", containerFactory = "rabbitListenerContainerFactory")
     public void handleCaixaDlq(Object evento, Message message) {
         String reason = extractDeathReason(message);
-        log.warn("Mensagem em DLQ de Caixa - Evento: {}, Razão: {} (TTL expired? {})", evento, reason,
-                "expired".equals(reason));
+        String routingKey = message.getMessageProperties().getReceivedRoutingKey();
+        log.warn("Mensagem em DLQ de Caixa - Routing Key: {}, Evento: {}, Razão: {}",
+            routingKey, evento, reason);
     }
 
     private String extractDeathReason(Message message) {
         @SuppressWarnings("unchecked")
         List<Map<String, Object>> xDeath = (List<Map<String, Object>>) message.getMessageProperties().getHeaders()
-                .get("x-death");
+            .get("x-death");
         return xDeath != null && !xDeath.isEmpty() ? (String) xDeath.get(0).get("reason") : "unknown";
     }
 }

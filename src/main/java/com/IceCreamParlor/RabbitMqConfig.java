@@ -1,315 +1,218 @@
 package com.IceCreamParlor;
 
-import org.springframework.amqp.core.Binding;
-import org.springframework.amqp.core.BindingBuilder;
-import org.springframework.amqp.core.DirectExchange;
-import org.springframework.amqp.core.Queue;
-import org.springframework.amqp.core.QueueBuilder;
-import org.springframework.amqp.core.TopicExchange;
+import org.springframework.amqp.core.*;
+import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
+import org.springframework.amqp.rabbit.connection.ConnectionFactory;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
+import org.springframework.boot.autoconfigure.amqp.SimpleRabbitListenerContainerFactoryConfigurer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class RabbitMqConfig {
 
-    // Nomes padronizados
     public static final String EXCHANGE_MAIN = "sorv.ex";
     public static final String EXCHANGE_DLX = "sorv.dlx";
-
-    // Filas principais
-    public static final String Q_WORKFLOW = "q.workflow";
-    public static final String Q_CAIXA = "q.caixa";
-    public static final String Q_ESTOQUE = "q.estoque";
-    public static final String Q_PRODUCAO = "q.producao";
-    public static final String Q_ENTREGAS = "q.entregas";
-    public static final String Q_CLIENTE = "q.cliente";
-    public static final String Q_RELATORIO = "q.relatorio";
-
-    // Filas retry
-    public static final String Q_WORKFLOW_RETRY = "q.workflow.retry";
-    public static final String Q_CAIXA_RETRY = "q.caixa.retry";
-    public static final String Q_ESTOQUE_RETRY = "q.estoque.retry";
-    public static final String Q_PRODUCAO_RETRY = "q.producao.retry";
-    public static final String Q_ENTREGAS_RETRY = "q.entregas.retry";
-    public static final String Q_CLIENTE_RETRY = "q.cliente.retry";
-    public static final String Q_RELATORIO_RETRY = "q.relatorio.retry";
-
-    // Filas DLQ
-    public static final String Q_WORKFLOW_DLQ = "q.workflow.dlq";
-    public static final String Q_CAIXA_DLQ = "q.caixa.dlq";
-    public static final String Q_ESTOQUE_DLQ = "q.estoque.dlq";
-    public static final String Q_PRODUCAO_DLQ = "q.producao.dlq";
-    public static final String Q_ENTREGAS_DLQ = "q.entregas.dlq";
-    public static final String Q_CLIENTE_DLQ = "q.cliente.dlq";
-    public static final String Q_RELATORIO_DLQ = "q.relatorio.dlq";
-
-    // TTL padrão de retry (ajuste se quiser backoff exponencial criando várias retries)
     private static final int RETRY_TTL_MS = 15_000;
 
-    // Exchanges
-    @Bean
-    TopicExchange sorvExchange() {
-        return new TopicExchange(EXCHANGE_MAIN, true, false);
-    }
+    @Bean TopicExchange sorvExchange() { return new TopicExchange(EXCHANGE_MAIN, true, false); }
+    @Bean DirectExchange sorvDlx() { return new DirectExchange(EXCHANGE_DLX, true, false); }
+    @Bean Jackson2JsonMessageConverter messageConverter() { return new Jackson2JsonMessageConverter(); }
 
     @Bean
-    DirectExchange sorvDlx() {
-        return new DirectExchange(EXCHANGE_DLX, true, false);
+    RabbitTemplate rabbitTemplate(ConnectionFactory cf, Jackson2JsonMessageConverter conv) {
+        RabbitTemplate t = new RabbitTemplate(cf);
+        t.setMessageConverter(conv);
+        return t;
     }
 
-    private static Queue mainQueue(String name) {
-        // manda falhas para o DLX com routing-key "<servico>.dead"
-        String deadRouting = name.replace("q.", "").replace(".retry", "").replace(".dlq", "") + ".dead";
-        return QueueBuilder.durable(name)
-            .withArgument("x-dead-letter-exchange", EXCHANGE_DLX)
-            .withArgument("x-dead-letter-routing-key", deadRouting)
-            .build();
+    @Bean
+    public SimpleRabbitListenerContainerFactory rabbitListenerContainerFactory(
+        ConnectionFactory connectionFactory,
+        SimpleRabbitListenerContainerFactoryConfigurer configurer,
+        Jackson2JsonMessageConverter messageConverter) {
+        SimpleRabbitListenerContainerFactory factory = new SimpleRabbitListenerContainerFactory();
+        configurer.configure(factory, connectionFactory);
+        factory.setMessageConverter(messageConverter);
+        factory.setPrefetchCount(1);
+        factory.setDefaultRequeueRejected(false);
+        return factory;
     }
 
-    private static Queue retryQueue(String name, String originalRoutingKey) {
-        // Retry espera TTL e volta para o exchange principal com a mesma routing key
-        return QueueBuilder.durable(name)
-            .withArgument("x-message-ttl", RETRY_TTL_MS)
-            .withArgument("x-dead-letter-exchange", EXCHANGE_MAIN)
-            .withArgument("x-dead-letter-routing-key", originalRoutingKey)
-            .build();
-    }
-
-    private static Queue dlq(String name) {
-        return QueueBuilder.durable(name).build();
-    }
-
-    private static Binding bindMain(Queue q, TopicExchange ex, String routing) {
-        return BindingBuilder.bind(q).to(ex).with(routing);
-    }
-
-    private static Binding bindDlq(Queue q, DirectExchange dlx, String deadRouting) {
-        return BindingBuilder.bind(q).to(dlx).with(deadRouting);
-    }
-
-    // ===== Declaração por domínio =====
-
-    // WORKFLOW
+    // ==================== WORKFLOW ====================
     @Bean
     Queue qWorkflow() {
-        return mainQueue(Q_WORKFLOW);
+        return QueueBuilder.durable("q.workflow")
+            .withArgument("x-dead-letter-exchange", EXCHANGE_DLX)
+            .withArgument("x-dead-letter-routing-key", "workflow.dead")
+            .build();
     }
 
     @Bean
     Queue qWorkflowRetry() {
-        return retryQueue(Q_WORKFLOW_RETRY, "workflow.*");
+        return QueueBuilder.durable("q.workflow.retry")
+            .withArgument("x-message-ttl", RETRY_TTL_MS)
+            .withArgument("x-dead-letter-exchange", EXCHANGE_MAIN)
+            .withArgument("x-dead-letter-routing-key", "workflow.retry.back")
+            .build();
     }
 
-    @Bean
-    Queue qWorkflowDlq() {
-        return dlq(Q_WORKFLOW_DLQ);
-    }
+    @Bean Queue qWorkflowDlq() { return QueueBuilder.durable("q.workflow.dlq").build(); }
 
-    @Bean
-    Binding bWorkflow(TopicExchange sorvExchange) {
-        return bindMain(qWorkflow(), sorvExchange, "workflow.*");
-    }
+    @Bean Binding bWorkflow() { return BindingBuilder.bind(qWorkflow()).to(sorvExchange()).with("workflow.*"); }
+    @Bean Binding bWorkflowRetry() { return BindingBuilder.bind(qWorkflowRetry()).to(sorvExchange()).with("workflow.retry"); }
+    @Bean Binding bWorkflowRetryBack() { return BindingBuilder.bind(qWorkflow()).to(sorvExchange()).with("workflow.retry.back"); }
+    @Bean Binding bWorkflowDlq() { return BindingBuilder.bind(qWorkflowDlq()).to(sorvDlx()).with("workflow.dead"); }
 
-    @Bean
-    Binding bWorkflowRetry(TopicExchange sorvExchange) {
-        return bindMain(qWorkflowRetry(), sorvExchange, "q.workflow.retry");
-    }
-
-    @Bean
-    Binding bWorkflowDlq(DirectExchange sorvDlx) {
-        return bindDlq(qWorkflowDlq(), sorvDlx, "workflow.dead");
-    }
-
-    // CAIXA
+    // ==================== CAIXA ====================
     @Bean
     Queue qCaixa() {
-        return mainQueue(Q_CAIXA);
+        return QueueBuilder.durable("q.caixa")
+            .withArgument("x-dead-letter-exchange", EXCHANGE_DLX)
+            .withArgument("x-dead-letter-routing-key", "caixa.dead")
+            .build();
     }
 
     @Bean
     Queue qCaixaRetry() {
-        return retryQueue(Q_CAIXA_RETRY, "caixa.#");
+        return QueueBuilder.durable("q.caixa.retry")
+            .withArgument("x-message-ttl", RETRY_TTL_MS)
+            .withArgument("x-dead-letter-exchange", EXCHANGE_MAIN)
+            .withArgument("x-dead-letter-routing-key", "caixa.retry.back")
+            .build();
     }
 
-    @Bean
-    Queue qCaixaDlq() {
-        return dlq(Q_CAIXA_DLQ);
-    }
+    @Bean Queue qCaixaDlq() { return QueueBuilder.durable("q.caixa.dlq").build(); }
 
-    @Bean
-    Binding bCaixa(TopicExchange ex) {
-        return bindMain(qCaixa(), ex, "caixa.#");
-    }
+    @Bean Binding bCaixa() { return BindingBuilder.bind(qCaixa()).to(sorvExchange()).with("caixa.#"); }
+    @Bean Binding bCaixaRetry() { return BindingBuilder.bind(qCaixaRetry()).to(sorvExchange()).with("caixa.retry"); }
+    @Bean Binding bCaixaRetryBack() { return BindingBuilder.bind(qCaixa()).to(sorvExchange()).with("caixa.retry.back"); }
+    @Bean Binding bCaixaDlq() { return BindingBuilder.bind(qCaixaDlq()).to(sorvDlx()).with("caixa.dead"); }
 
-    @Bean
-    Binding bCaixaRetry(TopicExchange ex) {
-        return bindMain(qCaixaRetry(), ex, "q.caixa.retry");
-    }
-
-    @Bean
-    Binding bCaixaDlq(DirectExchange dlx) {
-        return bindDlq(qCaixaDlq(), dlx, "caixa.dead");
-    }
-
-    // ESTOQUE
+    // ==================== ESTOQUE ====================
     @Bean
     Queue qEstoque() {
-        return mainQueue(Q_ESTOQUE);
+        return QueueBuilder.durable("q.estoque")
+            .withArgument("x-dead-letter-exchange", EXCHANGE_DLX)
+            .withArgument("x-dead-letter-routing-key", "estoque.dead")
+            .build();
     }
 
     @Bean
     Queue qEstoqueRetry() {
-        return retryQueue(Q_ESTOQUE_RETRY, "estoque.#");
+        return QueueBuilder.durable("q.estoque.retry")
+            .withArgument("x-message-ttl", RETRY_TTL_MS)
+            .withArgument("x-dead-letter-exchange", EXCHANGE_MAIN)
+            .withArgument("x-dead-letter-routing-key", "estoque.retry.back")
+            .build();
     }
 
-    @Bean
-    Queue qEstoqueDlq() {
-        return dlq(Q_ESTOQUE_DLQ);
-    }
+    @Bean Queue qEstoqueDlq() { return QueueBuilder.durable("q.estoque.dlq").build(); }
 
-    @Bean
-    Binding bEstoque(TopicExchange ex) {
-        return bindMain(qEstoque(), ex, "estoque.#");
-    }
+    @Bean Binding bEstoque() { return BindingBuilder.bind(qEstoque()).to(sorvExchange()).with("estoque.#"); }
+    @Bean Binding bEstoqueRetry() { return BindingBuilder.bind(qEstoqueRetry()).to(sorvExchange()).with("estoque.retry"); }
+    @Bean Binding bEstoqueRetryBack() { return BindingBuilder.bind(qEstoque()).to(sorvExchange()).with("estoque.retry.back"); }
+    @Bean Binding bEstoqueDlq() { return BindingBuilder.bind(qEstoqueDlq()).to(sorvDlx()).with("estoque.dead"); }
 
-    @Bean
-    Binding bEstoqueRetry(TopicExchange ex) {
-        return bindMain(qEstoqueRetry(), ex, "q.estoque.retry");
-    }
-
-    @Bean
-    Binding bEstoqueDlq(DirectExchange dlx) {
-        return bindDlq(qEstoqueDlq(), dlx, "estoque.dead");
-    }
-
-    // PRODUCAO
+    // ==================== PRODUÇÃO ====================
     @Bean
     Queue qProducao() {
-        return mainQueue(Q_PRODUCAO);
+        return QueueBuilder.durable("q.producao")
+            .withArgument("x-dead-letter-exchange", EXCHANGE_DLX)
+            .withArgument("x-dead-letter-routing-key", "producao.dead")
+            .build();
     }
 
     @Bean
     Queue qProducaoRetry() {
-        return retryQueue(Q_PRODUCAO_RETRY, "producao.#");
+        return QueueBuilder.durable("q.producao.retry")
+            .withArgument("x-message-ttl", RETRY_TTL_MS)
+            .withArgument("x-dead-letter-exchange", EXCHANGE_MAIN)
+            .withArgument("x-dead-letter-routing-key", "producao.retry.back")
+            .build();
     }
 
-    @Bean
-    Queue qProducaoDlq() {
-        return dlq(Q_PRODUCAO_DLQ);
-    }
+    @Bean Queue qProducaoDlq() { return QueueBuilder.durable("q.producao.dlq").build(); }
 
-    @Bean
-    Binding bProducao(TopicExchange ex) {
-        return bindMain(qProducao(), ex, "producao.#");
-    }
+    @Bean Binding bProducao() { return BindingBuilder.bind(qProducao()).to(sorvExchange()).with("producao.#"); }
+    @Bean Binding bProducaoRetry() { return BindingBuilder.bind(qProducaoRetry()).to(sorvExchange()).with("producao.retry"); }
+    @Bean Binding bProducaoRetryBack() { return BindingBuilder.bind(qProducao()).to(sorvExchange()).with("producao.retry.back"); }
+    @Bean Binding bProducaoDlq() { return BindingBuilder.bind(qProducaoDlq()).to(sorvDlx()).with("producao.dead"); }
 
-    @Bean
-    Binding bProducaoRetry(TopicExchange ex) {
-        return bindMain(qProducaoRetry(), ex, "q.producao.retry");
-    }
-
-    @Bean
-    Binding bProducaoDlq(DirectExchange dlx) {
-        return bindDlq(qProducaoDlq(), dlx, "producao.dead");
-    }
-
-    // ENTREGAS
+    // ==================== ENTREGAS ====================
     @Bean
     Queue qEntregas() {
-        return mainQueue(Q_ENTREGAS);
+        return QueueBuilder.durable("q.entregas")
+            .withArgument("x-dead-letter-exchange", EXCHANGE_DLX)
+            .withArgument("x-dead-letter-routing-key", "entregas.dead")
+            .build();
     }
 
     @Bean
     Queue qEntregasRetry() {
-        return retryQueue(Q_ENTREGAS_RETRY, "entregas.#");
+        return QueueBuilder.durable("q.entregas.retry")
+            .withArgument("x-message-ttl", RETRY_TTL_MS)
+            .withArgument("x-dead-letter-exchange", EXCHANGE_MAIN)
+            .withArgument("x-dead-letter-routing-key", "entregas.retry.back")
+            .build();
     }
 
-    @Bean
-    Queue qEntregasDlq() {
-        return dlq(Q_ENTREGAS_DLQ);
-    }
+    @Bean Queue qEntregasDlq() { return QueueBuilder.durable("q.entregas.dlq").build(); }
 
-    @Bean
-    Binding bEntregas(TopicExchange ex) {
-        return bindMain(qEntregas(), ex, "entregas.#");
-    }
+    @Bean Binding bEntregas() { return BindingBuilder.bind(qEntregas()).to(sorvExchange()).with("entregas.#"); }
+    @Bean Binding bEntregasRetry() { return BindingBuilder.bind(qEntregasRetry()).to(sorvExchange()).with("entregas.retry"); }
+    @Bean Binding bEntregasRetryBack() { return BindingBuilder.bind(qEntregas()).to(sorvExchange()).with("entregas.retry.back"); }
+    @Bean Binding bEntregasDlq() { return BindingBuilder.bind(qEntregasDlq()).to(sorvDlx()).with("entregas.dead"); }
 
-    @Bean
-    Binding bEntregasRetry(TopicExchange ex) {
-        return bindMain(qEntregasRetry(), ex, "q.entregas.retry");
-    }
-
-    @Bean
-    Binding bEntregasDlq(DirectExchange dlx) {
-        return bindDlq(qEntregasDlq(), dlx, "entregas.dead");
-    }
-
-    // CLIENTE
+    // ==================== CLIENTE ====================
     @Bean
     Queue qCliente() {
-        return mainQueue(Q_CLIENTE);
+        return QueueBuilder.durable("q.cliente")
+            .withArgument("x-dead-letter-exchange", EXCHANGE_DLX)
+            .withArgument("x-dead-letter-routing-key", "cliente.dead")
+            .build();
     }
 
     @Bean
     Queue qClienteRetry() {
-        return retryQueue(Q_CLIENTE_RETRY, "cliente.#");
+        return QueueBuilder.durable("q.cliente.retry")
+            .withArgument("x-message-ttl", RETRY_TTL_MS)
+            .withArgument("x-dead-letter-exchange", EXCHANGE_MAIN)
+            .withArgument("x-dead-letter-routing-key", "cliente.retry.back")
+            .build();
     }
 
-    @Bean
-    Queue qClienteDlq() {
-        return dlq(Q_CLIENTE_DLQ);
-    }
+    @Bean Queue qClienteDlq() { return QueueBuilder.durable("q.cliente.dlq").build(); }
 
-    @Bean
-    Binding bCliente(TopicExchange ex) {
-        return bindMain(qCliente(), ex, "cliente.#");
-    }
+    @Bean Binding bCliente() { return BindingBuilder.bind(qCliente()).to(sorvExchange()).with("cliente.#"); }
+    @Bean Binding bClienteRetry() { return BindingBuilder.bind(qClienteRetry()).to(sorvExchange()).with("cliente.retry"); }
+    @Bean Binding bClienteRetryBack() { return BindingBuilder.bind(qCliente()).to(sorvExchange()).with("cliente.retry.back"); }
+    @Bean Binding bClienteDlq() { return BindingBuilder.bind(qClienteDlq()).to(sorvDlx()).with("cliente.dead"); }
 
-    @Bean
-    Binding bClienteRetry(TopicExchange ex) {
-        return bindMain(qClienteRetry(), ex, "q.cliente.retry");
-    }
-
-    @Bean
-    Binding bClienteDlq(DirectExchange dlx) {
-        return bindDlq(qClienteDlq(), dlx, "cliente.dead");
-    }
-
-    // RELATORIO
+    // ==================== RELATÓRIO ====================
     @Bean
     Queue qRelatorio() {
-        return mainQueue(Q_RELATORIO);
+        return QueueBuilder.durable("q.relatorio")
+            .withArgument("x-dead-letter-exchange", EXCHANGE_DLX)
+            .withArgument("x-dead-letter-routing-key", "relatorio.dead")
+            .build();
     }
 
     @Bean
     Queue qRelatorioRetry() {
-        return retryQueue(Q_RELATORIO_RETRY, "relatorio.#");
+        return QueueBuilder.durable("q.relatorio.retry")
+            .withArgument("x-message-ttl", RETRY_TTL_MS)
+            .withArgument("x-dead-letter-exchange", EXCHANGE_MAIN)
+            .withArgument("x-dead-letter-routing-key", "relatorio.retry.back")
+            .build();
     }
 
-    @Bean
-    Queue qRelatorioDlq() {
-        return dlq(Q_RELATORIO_DLQ);
-    }
+    @Bean Queue qRelatorioDlq() { return QueueBuilder.durable("q.relatorio.dlq").build(); }
 
-    @Bean
-    Binding bRelatorio(TopicExchange ex) {
-        return bindMain(qRelatorio(), ex, "relatorio.#");
-    }
-
-    @Bean
-    Binding bRelatorioRetry(TopicExchange ex) {
-        return bindMain(qRelatorioRetry(), ex, "q.relatorio.retry");
-    }
-
-    @Bean
-    Binding bRelatorioDlq(DirectExchange dlx) {
-        return bindDlq(qRelatorioDlq(), dlx, "relatorio.dead");
-    }
-
-    @Bean
-    Jackson2JsonMessageConverter messageConverter() {
-        return new Jackson2JsonMessageConverter();
-    }
+    @Bean Binding bRelatorio() { return BindingBuilder.bind(qRelatorio()).to(sorvExchange()).with("relatorio.#"); }
+    @Bean Binding bRelatorioRetry() { return BindingBuilder.bind(qRelatorioRetry()).to(sorvExchange()).with("relatorio.retry"); }
+    @Bean Binding bRelatorioRetryBack() { return BindingBuilder.bind(qRelatorio()).to(sorvExchange()).with("relatorio.retry.back"); }
+    @Bean Binding bRelatorioDlq() { return BindingBuilder.bind(qRelatorioDlq()).to(sorvDlx()).with("relatorio.dead"); }
 
 }
