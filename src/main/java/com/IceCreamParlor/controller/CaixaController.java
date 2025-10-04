@@ -1,16 +1,11 @@
 package com.IceCreamParlor.controller;
 
+import com.IceCreamParlor.dto.entities.CaixaEntity;
 import com.IceCreamParlor.dto.repositories.CaixaRepository;
-import com.IceCreamParlor.service.CaixaServiceImpl;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import java.math.BigDecimal;
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -19,28 +14,14 @@ import java.util.UUID;
 public class CaixaController {
 
     private final CaixaRepository caixaRepository;
-    private final CaixaServiceImpl caixaService;
 
-
-    @GetMapping("/pagamentos")
-    public Object listarPagamentos() {
+    @GetMapping
+    public List<CaixaEntity> listarTodas() {
         return caixaRepository.findAll();
     }
 
-    @GetMapping("/pagamentos/{pedidoId}")
-    public Object buscarPorPedidoId(@PathVariable String pedidoId) {
-        return caixaRepository.findAll();
+    @GetMapping("/por-pedido/{pedidoId}")
+    public CaixaEntity buscarPorPedido(@PathVariable UUID pedidoId) {
+        return caixaRepository.findById(pedidoId).orElse(null);
     }
-
-    @PostMapping("pagamentos")
-    public void simularPagamento(  @RequestParam UUID pedidoId,
-                                   @RequestParam String clienteId,
-                                   @RequestParam BigDecimal valorTotal) {
-       // CaixaEvents evento = new CaixaEvents(pedidoId, clienteId, valorTotal);
-       // caixaService.processarPagamento(evento);
-    }
-
-
-
-
 }

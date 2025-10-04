@@ -1,34 +1,27 @@
 package com.IceCreamParlor.controller;
 
-import java.util.List;
-import java.util.UUID;
-
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
 import com.IceCreamParlor.dto.entities.EntregaEntity;
 import com.IceCreamParlor.dto.repositories.EntregaRepository;
-
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/entregas")
 @RequiredArgsConstructor
 public class EntregasController {
 
-    private final EntregaRepository repository;
+    private final EntregaRepository entregaRepository;
 
     @GetMapping
     public List<EntregaEntity> listarTodas() {
-        return repository.findAll();
+        return entregaRepository.findAll();
     }
 
-    @GetMapping("/{pedidoId}")
-    public EntregaEntity buscarPorPedidoId(@PathVariable UUID pedidoId) {
-        return repository.findById(pedidoId)
-            .orElseThrow(() -> new RuntimeException("Entrega não encontrada para o pedido: " + pedidoId));
+    @GetMapping("/por-pedido/{pedidoId}")
+    public EntregaEntity buscarPorPedido(@PathVariable UUID pedidoId) {
+        return entregaRepository.findById(pedidoId).orElse(null);
     }
 }
-
