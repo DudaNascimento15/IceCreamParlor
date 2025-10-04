@@ -25,4 +25,29 @@ spring:
       enabled: false
 
   rabbitmq:
-    uri: amqps://kmskovrf:Ei9fF3bR2B6P_7_R_vaxARNfCXkKqj1d@jackal.rmq.cloudamqp.com/kmskovrf
+    # URI completa do CloudAMQP (verifique se suas credenciais estão corretas)
+    addresses: jackal.rmq.cloudamqp.com:5671
+    username: kmskovrf
+    password: Ei9fF3bR2B6P_7_R_vaxARNfCXkKqj1d
+    virtual-host: kmskovrf
+    ssl:
+      enabled: true
+    # Configurações de conexão
+    connection-timeout: 30000
+    requested-heartbeat: 30
+    # Retry em caso de falha
+    template:
+      retry:
+        enabled: true
+        initial-interval: 2000
+        max-attempts: 3
+        multiplier: 2
+    listener:
+      simple:
+        retry:
+          enabled: true
+          initial-interval: 2000
+          max-attempts: 3
+          multiplier: 2
+        acknowledge-mode: auto
+        prefetch: 1

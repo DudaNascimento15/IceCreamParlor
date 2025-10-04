@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Map;
 
-import static com.IceCreamParlor.messaging.RabbitMqConfig.EXCHANGE_MAIN;
+import static com.IceCreamParlor.RabbitMqConfig.EXCHANGE_MAIN;
 
 @Component
 public class EventPublisher {

@@ -114,7 +114,7 @@ public class WorkflowServiceImpl {
 
     public void publish(String routingKey, Object payload, String correlationId, String usuario) {
         rabbit.convertAndSend(EX, routingKey, payload, msg -> {
-            msg.getMessageProperties().setContentType("aplication/json");
+            msg.getMessageProperties().setContentType("application/json");
             msg.getMessageProperties().setCorrelationId(correlationId);
             msg.getMessageProperties().setHeader("x-user", usuario);
             msg.getMessageProperties().setHeader("x-event-type", routingKey);
