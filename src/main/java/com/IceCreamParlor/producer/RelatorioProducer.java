@@ -2,20 +2,22 @@ package com.IceCreamParlor.producer;
 
 import com.IceCreamParlor.dto.entities.RelatorioEntity;
 import com.IceCreamParlor.dto.repositories.RelatorioRepository;
-import com.IceCreamParlor.messaging.MessagingRabbitmqApplication;
+import com.IceCreamParlor.messaging.EventPublisher;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-@Service
-public class RelatorioProducer {
-    private final RelatorioRepository repository;
+import java.util.Map;
 
-    public RelatorioProducer(RelatorioRepository repository) {
-        this.repository = repository;
-    }
+@Service
+@RequiredArgsConstructor
+public class RelatorioProducer {
+
+    private final RelatorioRepository repository;
+    private final EventPublisher eventPublisher;
 
     public void publishRelatorio(String conteudo, String correlationId, String usuario) {
-        RelatorioEntity relatorio = new RelatorioEntity("relatorio.novo", conteudo); // Usando o construtor correto
+        RelatorioEntity relatorio = new RelatorioEntity("relatorio.novo", conteudo);
         repository.save(relatorio);
-        MessagingRabbitmqApplication.publish("relatorio.novo", relatorio, correlationId, usuario);
+        eventPublisher.publish("relatorio.novo", relatorio, Map.of("x-user", usuario, "x-event-type", "relatorio.novo"));
     }
 }

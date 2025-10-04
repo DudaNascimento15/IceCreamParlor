@@ -6,6 +6,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.messaging.handler.annotation.Headers;
+import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -21,7 +23,14 @@ public class RelatorioConsumer {
         this.relatorioService = relatorioService;
     }
 
-    @RabbitListener(queues = "q.relatorio.evento.recebido", containerFactory = "rabbitListenerContainerFactory")
+    @RabbitListener(queues = "q.relatorio", containerFactory = "rabbitListenerContainerFactory")
+    public void onMessage(Message message, @Payload Object evento, @Headers Map<String, Object> headers) {
+        String routingKey = message.getMessageProperties().getReceivedRoutingKey();
+        if ("relatorio.evento.recebido".equals(routingKey) && evento instanceof RelatorioEvents.EventoRecebido) {
+            onEventoRecebido((RelatorioEvents.EventoRecebido) evento);
+        }
+    }
+
     public void onEventoRecebido(RelatorioEvents.EventoRecebido evento) {
         try {
             log.info("Relatório: evento recebido - nome: {}", evento.nomeEvento());
@@ -35,13 +44,14 @@ public class RelatorioConsumer {
     @RabbitListener(queues = "q.relatorio.evento.recebido.dlq", containerFactory = "rabbitListenerContainerFactory")
     public void handleRelatorioDlq(RelatorioEvents.EventoRecebido evento, Message message) {
         String reason = extractDeathReason(message);
-        log.warn("Mensagem em DLQ de Relatório - Evento: {}, Razão: {} (TTL expired? {})", evento.nomeEvento(), reason, "expired".equals(reason));
-        // Ação: relatorioService.salvarErroDlq(evento, reason);
+        log.warn("Mensagem em DLQ de Relatório - Evento: {}, Razão: {} (TTL expired? {})", evento.nomeEvento(), reason,
+                "expired".equals(reason));
     }
 
     private String extractDeathReason(Message message) {
         @SuppressWarnings("unchecked")
-        List<Map<String, Object>> xDeath = (List<Map<String, Object>>) message.getMessageProperties().getHeaders().get("x-death");
+        List<Map<String, Object>> xDeath = (List<Map<String, Object>>) message.getMessageProperties().getHeaders()
+                .get("x-death");
         return xDeath != null && !xDeath.isEmpty() ? (String) xDeath.get(0).get("reason") : "unknown";
     }
 }

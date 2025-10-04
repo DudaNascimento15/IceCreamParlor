@@ -38,7 +38,6 @@ public class ProducaoEntity {
     public ProducaoEntity(UUID uuid, String emPreparo) {
     }
 
-    public ProducaoEntity() {}
 
     public ProducaoEntity(UUID pedidoId, StatusProducaoEnum status) {
         this.pedidoId = pedidoId;

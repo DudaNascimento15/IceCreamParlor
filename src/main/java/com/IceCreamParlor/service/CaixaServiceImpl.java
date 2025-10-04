@@ -8,7 +8,6 @@ import com.IceCreamParlor.dto.repositories.CaixaRepository;
 import com.IceCreamParlor.producer.CaixaProducer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,12 +21,6 @@ public class CaixaServiceImpl {
     private final CaixaRepository caixaRepository;
 
     private final CaixaProducer caixaProducer;
-
-    private final Random random = new Random();
-
-    private final RabbitTemplate rabbit;
-
-    private static final String EX = "sorv.ex";
 
     public boolean simularAprovacao() {
         return new Random().nextDouble() < 0.7;

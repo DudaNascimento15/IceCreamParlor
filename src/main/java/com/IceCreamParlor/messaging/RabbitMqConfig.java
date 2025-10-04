@@ -1,4 +1,4 @@
-package com.icecreamparlor.messaging;
+package com.IceCreamParlor.messaging;
 
 import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.BindingBuilder;

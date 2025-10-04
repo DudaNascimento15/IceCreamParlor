@@ -1,10 +1,8 @@
 package com.IceCreamParlor.service;
 
-import com.IceCreamParlor.consumer.EntregasConsumer;
 import com.IceCreamParlor.dto.entities.EntregaEntity;
 import com.IceCreamParlor.dto.enums.StatusEntregaEnum;
 import com.IceCreamParlor.dto.events.EntregaEvents;
-import com.IceCreamParlor.dto.events.WorkflowEvents;
 import com.IceCreamParlor.dto.repositories.EntregaRepository;
 import com.IceCreamParlor.producer.EntregasProducer;
 import lombok.RequiredArgsConstructor;
@@ -20,8 +18,6 @@ import java.util.UUID;
 public class EntregasServiceImpl {
 
     private final EntregaRepository entregaRepository;
-
-    private final EntregasConsumer entregaProducer;
 
     private final EntregasProducer entregasProducer;
 
