@@ -131,6 +131,15 @@ GRANT ALL PRIVILEGES ON DATABASE sorveteria TO icecream_user;
 
 -- Conceder permissões no schema
 GRANT ALL ON SCHEMA public TO icecream_user;
+
+GRANT ALL PRIVILEGES ON DATABASE sorveteria TO icecream_user;
+GRANT ALL PRIVILEGES ON SCHEMA public TO icecream_user;
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO icecream_user;
+GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO icecream_user;
+
+-- Garantir permissões futuras
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO icecream_user;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO icecream_user
 ```
 
 ### 3. Configurar CloudAMQP

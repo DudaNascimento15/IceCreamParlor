@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.OffsetDateTime;
 import java.util.UUID;
 
 @Slf4j
@@ -18,101 +19,127 @@ import java.util.UUID;
 public class WorkflowServiceImpl {
 
     private final SagaStateRepository sagaStateRepository;
-
     private final RabbitTemplate rabbit;
-
     private static final String EX = "sorv.ex";
 
     @Transactional
     public UUID iniciarPedido(String clienteId, BigDecimal total, String usuario) {
         UUID pedidoId = UUID.randomUUID();
 
-        log.info("Iniciando pedido - pedidoId: {}, cliente: {}, valor: {}",
-            pedidoId, clienteId, total);
+        log.info("🚀 ========== INICIANDO PEDIDO ==========");
+        log.info("🚀 pedidoId: {}", pedidoId);
+        log.info("🚀 cliente: {}", clienteId);
+        log.info("🚀 valor: {}", total);
+        log.info("🚀 usuario: {}", usuario);
 
-        var s = new WorkflowEntity(
-            pedidoId,
-            clienteId,
-            total
-        );
-        sagaStateRepository.save(s);
+        WorkflowEntity workflow = new WorkflowEntity(pedidoId, clienteId, total);
+        sagaStateRepository.save(workflow);
+        log.info("✅ Workflow salvo no banco!");
 
-        var pedioIdStr = pedidoId.toString();
+        String pedidoIdStr = pedidoId.toString();
 
-        publish
-            ("caixa.pagamento.iniciado", new WorkflowEvents.PagamentoIniciado(pedidoId, usuario, total), pedioIdStr, usuario);
+        log.info("📤 Publicando evento: caixa.pagamento.iniciado");
+        publish("caixa.pagamento.iniciado",
+            new WorkflowEvents.PagamentoIniciado(pedidoId, clienteId, total),
+            pedidoIdStr, usuario);
 
-        publish("estoque.reserva.solicitada", new WorkflowEvents.ReservaSolicitada(pedidoId, usuario), pedioIdStr, usuario);
+        log.info("📤 Publicando evento: estoque.reserva.solicitada");
+        publish("estoque.reserva.solicitada",
+            new WorkflowEvents.ReservaSolicitada(pedidoId, clienteId),
+            pedidoIdStr, usuario);
 
-        publish("entrega.pedido.criar", new WorkflowEvents.EntregaCriada(pedidoId, s.getClienteId()), pedioIdStr, usuario);
+        log.info("✅ Pedido criado com sucesso! pedidoId: {}", pedidoId);
+        log.info("🚀 ========== FIM INICIANDO PEDIDO ==========");
 
-        log.info("Pedido Criado! Enviado para o Cliente {} , pedido {} : " + usuario, pedioIdStr);
-
-        return s.getPedidoId();
+        return pedidoId;
     }
-
-    ;
-
-    @Transactional
-    public void pagamentoNegado(UUID pedidoId) {
-        log.warn(" Pagamento negado - pedidoId: {}", pedidoId);
-        WorkflowEntity workflow = sagaStateRepository.findById(pedidoId)
-            .orElseThrow(() -> new RuntimeException("Workflow não encontrado: " + pedidoId));
-    }
-
-    ;
 
     @Transactional
     public void pagamentoAprovado(UUID pedidoId, String usuario) {
-        log.warn(" Pagamento aprovado - pedidoId: {}", pedidoId);
-        final var s = sagaStateRepository.findById(pedidoId).orElseThrow();
-        s.setPagamentoOk(true);
-        sagaStateRepository.save(s);
-        tentaConfirmar(s, usuario);
+        log.info("💰 Pagamento aprovado - pedidoId: {}", pedidoId);
+
+        WorkflowEntity workflow = sagaStateRepository.findByPedidoId(pedidoId)
+            .orElseThrow(() -> new RuntimeException("Workflow não encontrado: " + pedidoId));
+
+        workflow.setPagamentoOk(true);
+        workflow.setStatus("PAGAMENTO_OK");
+        sagaStateRepository.save(workflow);
+
+        tentaConfirmar(workflow, usuario);
     }
 
-    ;
+    @Transactional
+    public void pagamentoNegado(UUID pedidoId) {
+        log.warn("❌ Pagamento negado - pedidoId: {}", pedidoId);
 
+        WorkflowEntity workflow = sagaStateRepository.findByPedidoId(pedidoId)
+            .orElseThrow(() -> new RuntimeException("Workflow não encontrado: " + pedidoId));
+
+        workflow.setStatus("PAGAMENTO_NEGADO");
+        sagaStateRepository.save(workflow);
+    }
 
     @Transactional
     public void reservaConfirmada(UUID pedidoId, String usuario) {
-        log.info("Reserva confirmada - pedidoId: {}", pedidoId);
+        log.info("📦 Reserva confirmada - pedidoId: {}", pedidoId);
 
-        var s = sagaStateRepository.findById(pedidoId).orElseThrow();
-        s.setEstoqueOk(true);
-        sagaStateRepository.save(s);
-        tentaConfirmar(s, usuario);
+        WorkflowEntity workflow = sagaStateRepository.findByPedidoId(pedidoId)
+            .orElseThrow(() -> new RuntimeException("Workflow não encontrado: " + pedidoId));
+
+        workflow.setEstoqueOk(true);
+        workflow.setStatus("ESTOQUE_OK");
+        sagaStateRepository.save(workflow);
+
+        tentaConfirmar(workflow, usuario);
     }
 
-    ;
-
+    @Transactional
     public void reservaNegada(UUID pedidoId) {
-        log.warn("Reserva negada - pedidoId: {}", pedidoId);
-        sagaStateRepository.findById(pedidoId).orElseThrow();
+        log.warn("❌ Reserva negada - pedidoId: {}", pedidoId);
+
+        WorkflowEntity workflow = sagaStateRepository.findByPedidoId(pedidoId)
+            .orElseThrow(() -> new RuntimeException("Workflow não encontrado: " + pedidoId));
+
+        workflow.setStatus("ESTOQUE_NEGADO");
+        sagaStateRepository.save(workflow);
     }
 
-    ;
+    private void tentaConfirmar(WorkflowEntity workflow, String usuario) {
+        if (Boolean.TRUE.equals(workflow.getPagamentoOk()) && Boolean.TRUE.equals(workflow.getEstoqueOk())) {
+            log.info("✅ CONFIRMANDO PEDIDO! - pedidoId: {}", workflow.getPedidoId());
 
-    public void tentaConfirmar(WorkflowEntity workflowEntity, String usuario) {
-        if (workflowEntity.getPagamentoOk() && workflowEntity.getEstoqueOk()) {
+            workflow.setStatus("CONFIRMADO");
+            workflow.setConfirmadoEm(OffsetDateTime.now());
+            sagaStateRepository.save(workflow);
+
+            log.info("📤 PUBLICANDO pedidos.pedido.confirmado");
             publish("pedidos.pedido.confirmado",
                 new WorkflowEvents.PedidoConfirmado(
-                    workflowEntity.getPedidoId(),
-                    workflowEntity.getClienteId(),
-                    workflowEntity.getTotal()
-                ), workflowEntity.getPedidoId().toString(), usuario);
+                    workflow.getPedidoId(),
+                    workflow.getClienteId(),
+                    workflow.getTotal()
+                ),
+                workflow.getPedidoId().toString(),
+                usuario);
+
+            log.info("📤 PUBLICANDO entregas.pedido.criar");
+            publish("entregas.pedido.criar",
+                new WorkflowEvents.EntregaCriada(
+                    workflow.getPedidoId(),
+                    workflow.getClienteId()
+                ),
+                workflow.getPedidoId().toString(),
+                usuario);
+
+            log.info("✅ EVENTOS PUBLICADOS COM SUCESSO!");
 
         } else {
-            log.debug("Aguardando confirmações - pedidoId: {}, pagamento: {}, estoque: {}",
-                workflowEntity.getPedidoId(),
-                workflowEntity.getPagamentoOk(),
-                workflowEntity.getEstoqueOk());
+            log.warn("⏳ AGUARDANDO - pagamento: {}, estoque: {}",
+                workflow.getPagamentoOk(), workflow.getEstoqueOk());
         }
     }
 
-    ;
-
-    public void publish(String routingKey, Object payload, String correlationId, String usuario) {
+    private void publish(String routingKey, Object payload, String correlationId, String usuario) {
         rabbit.convertAndSend(EX, routingKey, payload, msg -> {
             msg.getMessageProperties().setContentType("application/json");
             msg.getMessageProperties().setCorrelationId(correlationId);
@@ -120,10 +147,6 @@ public class WorkflowServiceImpl {
             msg.getMessageProperties().setHeader("x-event-type", routingKey);
             return msg;
         });
-        log.debug("Mensagem publicada - routing: {}, correlationId: {}", routingKey, correlationId);
+        log.debug("📤 Mensagem publicada - routing: {}, correlationId: {}", routingKey, correlationId);
     }
-    }
-
-    
-
-
+}

@@ -1,12 +1,8 @@
 package com.IceCreamParlor.dto.entities;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
@@ -17,6 +13,7 @@ import java.util.UUID;
 public class EstoqueEntity {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "id", nullable = false, columnDefinition = "uuid")
     private UUID id;
 
@@ -24,7 +21,7 @@ public class EstoqueEntity {
     private UUID pedidoId;
 
     @Column(name = "itens_reservados", nullable = false)
-    private Boolean itensReservados;
+    private Boolean itensReservados = true;
 
     @Column(name = "status", nullable = false, length = 20)
     private String status;
@@ -46,9 +43,6 @@ public class EstoqueEntity {
     }
 
     public EstoqueEntity(UUID pedidoId, String status) {
-        this(pedidoId, String.valueOf(status), null);
+        this(pedidoId, status, null);
     }
-
-
 }
-

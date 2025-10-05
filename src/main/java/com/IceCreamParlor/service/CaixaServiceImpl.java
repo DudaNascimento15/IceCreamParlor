@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Random;
-import java.util.UUID;
 
 @Slf4j
 @Service
@@ -20,7 +19,6 @@ import java.util.UUID;
 public class CaixaServiceImpl {
 
     private final CaixaRepository caixaRepository;
-
     private final CaixaProducer caixaProducer;
 
     public boolean simularAprovacao() {
@@ -29,14 +27,14 @@ public class CaixaServiceImpl {
 
     @Transactional
     public void processarPagamento(WorkflowEvents.PagamentoIniciado evento, String correlationId, String usuario) {
-        log.info("Processando pagamento para o pedido: " + evento.pedidoId());
+        log.info("💳 Processando pagamento para o pedido: {}", evento.pedidoId());
 
         boolean aprovado = simularAprovacao();
 
         if (aprovado) {
             CaixaEntity caixa = new CaixaEntity(
                 evento.pedidoId(),
-                StatusCaixaEnum.APROVADO.toString(),
+                StatusCaixaEnum.APROVADO.toString(),  // Converter para String
                 evento.valorTotal()
             );
             caixaRepository.save(caixa);
@@ -49,11 +47,11 @@ public class CaixaServiceImpl {
                 );
 
             caixaProducer.publishPagamentoAprovado(aprovadoEvent, correlationId, usuario);
-            log.info("Pagamento aprovado, para o pedido: {}" + evento.pedidoId());
+            log.info("✅ Pagamento aprovado para o pedido: {}", evento.pedidoId());
         } else {
             CaixaEntity caixa = new CaixaEntity(
                 evento.pedidoId(),
-                StatusCaixaEnum.NEGADO.toString(),
+                StatusCaixaEnum.NEGADO.toString(),  // Converter para String
                 evento.valorTotal()
             );
 
@@ -68,8 +66,7 @@ public class CaixaServiceImpl {
 
             caixaProducer.publishPagamentoNegado(negadoEvent, correlationId, usuario);
 
-            log.warn("pagamento negado para o pedido: {}" + evento.pedidoId());
+            log.warn("❌ Pagamento negado para o pedido: {}", evento.pedidoId());
         }
     }
-
 }

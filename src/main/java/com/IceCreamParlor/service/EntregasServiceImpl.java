@@ -2,9 +2,10 @@ package com.IceCreamParlor.service;
 
 import com.IceCreamParlor.dto.entities.EntregaEntity;
 import com.IceCreamParlor.dto.enums.StatusEntregaEnum;
-import com.IceCreamParlor.dto.events.EntregaEvents;
+import com.IceCreamParlor.dto.events.ClienteEvents;
+import com.IceCreamParlor.dto.events.WorkflowEvents;
 import com.IceCreamParlor.repositories.EntregaRepository;
-import com.IceCreamParlor.producer.EntregasProducer;
+import com.IceCreamParlor.producer.ClienteProducer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -18,64 +19,67 @@ import java.util.UUID;
 public class EntregasServiceImpl {
 
     private final EntregaRepository entregaRepository;
-
-    private final EntregasProducer entregasProducer;
+    private final ClienteProducer clienteProducer;
 
     @Transactional
-    public void processarEntrega(EntregaEvents.CriarEntrega evento, String correlationId, String usuario) {
-        log.info("Processando criação de entrega - pedidoId: {}", evento.pedidoId());
+    public void processarEntrega(WorkflowEvents.EntregaCriada evento, String correlationId, String usuario) {
+        log.info("🚚 Processando criação de entrega - pedidoId: {}", evento.pedidoId());
 
+        // Cria entrega
         criarEntrega(evento.pedidoId(), evento.clienteId());
 
+        // Despacha
         marcarComoDespachado(evento.pedidoId(), evento.clienteId(), correlationId, usuario);
 
+        // A caminho
         marcarComoACaminho(evento.pedidoId(), evento.clienteId(), correlationId, usuario);
 
+        // Entregue
         marcarEntregue(evento.pedidoId(), evento.clienteId(), correlationId, usuario);
     }
 
-      public void criarEntrega(UUID pedidoId, String clienteId) {
+    @Transactional
+    public void criarEntrega(UUID pedidoId, String clienteId) {
         EntregaEntity entrega = new EntregaEntity(pedidoId, StatusEntregaEnum.CRIADO);
         entregaRepository.save(entrega);
-        log.info("entrega criada - pedidoId: {}", pedidoId);
+        log.info("✅ Entrega criada - pedidoId: {}", pedidoId);
     }
 
     private void marcarComoDespachado(UUID pedidoId, String clienteId, String correlationId, String usuario) {
         atualizarStatus(pedidoId, StatusEntregaEnum.DESPACHADO);
 
-        EntregaEvents.PedidoDespachado evento =
-            new EntregaEvents.PedidoDespachado(pedidoId, clienteId);
-        entregasProducer.publishPedidoDespachado(evento, correlationId, usuario);
+        ClienteEvents.PedidoDespachado evento =
+            new ClienteEvents.PedidoDespachado(pedidoId, clienteId);
+        clienteProducer.publishPedidoDespachado(evento, correlationId, usuario);
 
-        log.info("Pedido despachado - pedidoId: {}", pedidoId);
+        log.info("📦 Pedido despachado - pedidoId: {}", pedidoId);
     }
 
     private void marcarComoACaminho(UUID pedidoId, String clienteId, String correlationId, String usuario) {
         atualizarStatus(pedidoId, StatusEntregaEnum.A_CAMINHO);
 
-        EntregaEvents.PedidoACaminho evento =
-            new EntregaEvents.PedidoACaminho(pedidoId, clienteId);
-        entregasProducer.publishPedidoACaminho(evento, correlationId, usuario);
+        ClienteEvents.PedidoACaminho evento =
+            new ClienteEvents.PedidoACaminho(pedidoId, clienteId);
+        clienteProducer.publishPedidoACaminho(evento, correlationId, usuario);
 
-        log.info("Pedido a caminho - pedidoId: {}", pedidoId);
+        log.info("🚗 Pedido a caminho - pedidoId: {}", pedidoId);
     }
 
     private void marcarEntregue(UUID pedidoId, String clienteId, String correlationId, String usuario) {
         atualizarStatus(pedidoId, StatusEntregaEnum.ENTREGUE);
 
-        EntregaEvents.PedidoEntregue evento =
-            new EntregaEvents.PedidoEntregue(pedidoId, clienteId);
-        entregasProducer.publishPedidoEntregue(evento, correlationId, usuario);
+        ClienteEvents.PedidoEntregue evento =
+            new ClienteEvents.PedidoEntregue(pedidoId, clienteId);
+        clienteProducer.publishPedidoEntregue(evento, correlationId, usuario);
 
-        log.info("Pedido entregue - pedidoId: {}", pedidoId);
+        log.info("✅ Pedido entregue - pedidoId: {}", pedidoId);
     }
 
     private void atualizarStatus(UUID pedidoId, StatusEntregaEnum status) {
-        EntregaEntity entrega = entregaRepository.findById(pedidoId)
+        EntregaEntity entrega = entregaRepository.findByPedidoId(pedidoId)
             .orElseThrow(() -> new RuntimeException("Entrega não encontrada: " + pedidoId));
 
         entrega.atualizarStatus(status);
         entregaRepository.save(entrega);
     }
-
 }

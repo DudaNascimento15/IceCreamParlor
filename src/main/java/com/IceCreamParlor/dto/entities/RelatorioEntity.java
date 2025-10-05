@@ -1,12 +1,8 @@
 package com.IceCreamParlor.dto.entities;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-import jakarta.persistence.Id;
-
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
@@ -17,6 +13,7 @@ import java.util.UUID;
 public class RelatorioEntity {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "id", nullable = false, columnDefinition = "uuid")
     private UUID id;
 
@@ -38,11 +35,9 @@ public class RelatorioEntity {
     public RelatorioEntity() {
     }
 
-
     public RelatorioEntity(String evento, String payload) {
         this.evento = evento;
         this.payload = payload;
         this.criadoEm = OffsetDateTime.now();
     }
-
 }

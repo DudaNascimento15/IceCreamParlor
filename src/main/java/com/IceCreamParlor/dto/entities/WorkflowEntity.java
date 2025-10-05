@@ -1,12 +1,8 @@
 package com.IceCreamParlor.dto.entities;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-import jakarta.persistence.Id;
-
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.UUID;
@@ -18,6 +14,7 @@ import java.util.UUID;
 public class WorkflowEntity {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "id", nullable = false, columnDefinition = "uuid")
     private UUID id;
 
@@ -31,27 +28,26 @@ public class WorkflowEntity {
     private BigDecimal total;
 
     @Column(nullable = false, length = 20)
-    private String status;
+    private String status = "INICIADO";
 
     @Column(name = "pagamento_ok")
-    private Boolean pagamentoOk;
+    private Boolean pagamentoOk = false;
 
     @Column(name = "estoque_ok")
-    private Boolean estoqueOk;
+    private Boolean estoqueOk = false;
 
     @Column(name = "confirmado_em")
     private OffsetDateTime confirmadoEm;
 
-
-    protected WorkflowEntity() {
+    public WorkflowEntity() {
     }
-
-    ;
 
     public WorkflowEntity(UUID pedidoId, String clienteId, BigDecimal valorTotal) {
         this.pedidoId = pedidoId;
         this.clienteId = clienteId;
         this.total = valorTotal;
+        this.status = "INICIADO";
+        this.pagamentoOk = false;
+        this.estoqueOk = false;
     }
-
 }

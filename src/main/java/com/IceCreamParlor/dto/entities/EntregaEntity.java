@@ -1,14 +1,9 @@
 package com.IceCreamParlor.dto.entities;
 
 import com.IceCreamParlor.dto.enums.StatusEntregaEnum;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-import jakarta.persistence.Id;
-
-
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
@@ -19,6 +14,7 @@ import java.util.UUID;
 public class EntregaEntity {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "id", nullable = false, columnDefinition = "uuid")
     private UUID id;
 
@@ -32,12 +28,6 @@ public class EntregaEntity {
     private OffsetDateTime criadoEm = OffsetDateTime.now();
 
     public EntregaEntity() {
-    }
-
-    public EntregaEntity(String pedidoId, StatusEntregaEnum status) {
-        this.pedidoId = UUID.fromString(pedidoId);
-        this.status = status.toString();
-        this.criadoEm = OffsetDateTime.now();
     }
 
     public EntregaEntity(UUID pedidoId, StatusEntregaEnum status) {

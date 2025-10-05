@@ -4,10 +4,12 @@ import org.springframework.amqp.core.*;
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.amqp.support.converter.DefaultJackson2JavaTypeMapper;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.boot.autoconfigure.amqp.SimpleRabbitListenerContainerFactoryConfigurer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.amqp.support.converter.DefaultJackson2JavaTypeMapper;
 
 @Configuration
 public class RabbitMqConfig {
@@ -18,7 +20,6 @@ public class RabbitMqConfig {
 
     @Bean TopicExchange sorvExchange() { return new TopicExchange(EXCHANGE_MAIN, true, false); }
     @Bean DirectExchange sorvDlx() { return new DirectExchange(EXCHANGE_DLX, true, false); }
-    @Bean Jackson2JsonMessageConverter messageConverter() { return new Jackson2JsonMessageConverter(); }
 
     @Bean
     RabbitTemplate rabbitTemplate(ConnectionFactory cf, Jackson2JsonMessageConverter conv) {
@@ -60,7 +61,10 @@ public class RabbitMqConfig {
 
     @Bean Queue qWorkflowDlq() { return QueueBuilder.durable("q.workflow.dlq").build(); }
 
-    @Bean Binding bWorkflow() { return BindingBuilder.bind(qWorkflow()).to(sorvExchange()).with("workflow.*"); }
+    @Bean Binding bWorkflowCaixaAprovado() { return BindingBuilder.bind(qWorkflow()).to(sorvExchange()).with("caixa.pagamento.aprovado"); }
+    @Bean Binding bWorkflowCaixaNegado() { return BindingBuilder.bind(qWorkflow()).to(sorvExchange()).with("caixa.pagamento.negado"); }
+    @Bean Binding bWorkflowEstoqueConfirmada() { return BindingBuilder.bind(qWorkflow()).to(sorvExchange()).with("estoque.reserva.confirmada"); }
+    @Bean Binding bWorkflowEstoqueNegada() { return BindingBuilder.bind(qWorkflow()).to(sorvExchange()).with("estoque.reserva.negada"); }
     @Bean Binding bWorkflowRetry() { return BindingBuilder.bind(qWorkflowRetry()).to(sorvExchange()).with("workflow.retry"); }
     @Bean Binding bWorkflowRetryBack() { return BindingBuilder.bind(qWorkflow()).to(sorvExchange()).with("workflow.retry.back"); }
     @Bean Binding bWorkflowDlq() { return BindingBuilder.bind(qWorkflowDlq()).to(sorvDlx()).with("workflow.dead"); }
@@ -85,7 +89,7 @@ public class RabbitMqConfig {
 
     @Bean Queue qCaixaDlq() { return QueueBuilder.durable("q.caixa.dlq").build(); }
 
-    @Bean Binding bCaixa() { return BindingBuilder.bind(qCaixa()).to(sorvExchange()).with("caixa.#"); }
+    @Bean Binding bCaixaIniciado() { return BindingBuilder.bind(qCaixa()).to(sorvExchange()).with("caixa.pagamento.iniciado"); }
     @Bean Binding bCaixaRetry() { return BindingBuilder.bind(qCaixaRetry()).to(sorvExchange()).with("caixa.retry"); }
     @Bean Binding bCaixaRetryBack() { return BindingBuilder.bind(qCaixa()).to(sorvExchange()).with("caixa.retry.back"); }
     @Bean Binding bCaixaDlq() { return BindingBuilder.bind(qCaixaDlq()).to(sorvDlx()).with("caixa.dead"); }
@@ -110,7 +114,7 @@ public class RabbitMqConfig {
 
     @Bean Queue qEstoqueDlq() { return QueueBuilder.durable("q.estoque.dlq").build(); }
 
-    @Bean Binding bEstoque() { return BindingBuilder.bind(qEstoque()).to(sorvExchange()).with("estoque.#"); }
+    @Bean Binding bEstoqueSolicitada() { return BindingBuilder.bind(qEstoque()).to(sorvExchange()).with("estoque.reserva.solicitada"); }
     @Bean Binding bEstoqueRetry() { return BindingBuilder.bind(qEstoqueRetry()).to(sorvExchange()).with("estoque.retry"); }
     @Bean Binding bEstoqueRetryBack() { return BindingBuilder.bind(qEstoque()).to(sorvExchange()).with("estoque.retry.back"); }
     @Bean Binding bEstoqueDlq() { return BindingBuilder.bind(qEstoqueDlq()).to(sorvDlx()).with("estoque.dead"); }
@@ -135,7 +139,8 @@ public class RabbitMqConfig {
 
     @Bean Queue qProducaoDlq() { return QueueBuilder.durable("q.producao.dlq").build(); }
 
-    @Bean Binding bProducao() { return BindingBuilder.bind(qProducao()).to(sorvExchange()).with("producao.#"); }
+    @Bean Binding bProducaoConfirmado() { return BindingBuilder.bind(qProducao()).to(sorvExchange()).with("pedidos.pedido.confirmado"); }
+    @Bean Binding bProducaoPronto() { return BindingBuilder.bind(qProducao()).to(sorvExchange()).with("pedidos.pedido.pronto"); }
     @Bean Binding bProducaoRetry() { return BindingBuilder.bind(qProducaoRetry()).to(sorvExchange()).with("producao.retry"); }
     @Bean Binding bProducaoRetryBack() { return BindingBuilder.bind(qProducao()).to(sorvExchange()).with("producao.retry.back"); }
     @Bean Binding bProducaoDlq() { return BindingBuilder.bind(qProducaoDlq()).to(sorvDlx()).with("producao.dead"); }
@@ -160,7 +165,10 @@ public class RabbitMqConfig {
 
     @Bean Queue qEntregasDlq() { return QueueBuilder.durable("q.entregas.dlq").build(); }
 
-    @Bean Binding bEntregas() { return BindingBuilder.bind(qEntregas()).to(sorvExchange()).with("entregas.#"); }
+    @Bean Binding bEntregasCriar() { return BindingBuilder.bind(qEntregas()).to(sorvExchange()).with("entregas.pedido.criar"); }
+    @Bean Binding bEntregasDespachado() { return BindingBuilder.bind(qEntregas()).to(sorvExchange()).with("entregas.pedido.despachado"); }
+    @Bean Binding bEntregasACaminho() { return BindingBuilder.bind(qEntregas()).to(sorvExchange()).with("entregas.pedido.a_caminho"); }
+    @Bean Binding bEntregasEntregue() { return BindingBuilder.bind(qEntregas()).to(sorvExchange()).with("entregas.pedido.entregue"); }
     @Bean Binding bEntregasRetry() { return BindingBuilder.bind(qEntregasRetry()).to(sorvExchange()).with("entregas.retry"); }
     @Bean Binding bEntregasRetryBack() { return BindingBuilder.bind(qEntregas()).to(sorvExchange()).with("entregas.retry.back"); }
     @Bean Binding bEntregasDlq() { return BindingBuilder.bind(qEntregasDlq()).to(sorvDlx()).with("entregas.dead"); }
@@ -185,7 +193,10 @@ public class RabbitMqConfig {
 
     @Bean Queue qClienteDlq() { return QueueBuilder.durable("q.cliente.dlq").build(); }
 
-    @Bean Binding bCliente() { return BindingBuilder.bind(qCliente()).to(sorvExchange()).with("cliente.#"); }
+    @Bean Binding bClientePronto() { return BindingBuilder.bind(qCliente()).to(sorvExchange()).with("cliente.pedido.pronto"); }
+    @Bean Binding bClienteDespachado() { return BindingBuilder.bind(qCliente()).to(sorvExchange()).with("cliente.pedido.despachado"); }
+    @Bean Binding bClienteACaminho() { return BindingBuilder.bind(qCliente()).to(sorvExchange()).with("cliente.pedido.a_caminho"); }
+    @Bean Binding bClienteEntregue() { return BindingBuilder.bind(qCliente()).to(sorvExchange()).with("cliente.pedido.entregue"); }
     @Bean Binding bClienteRetry() { return BindingBuilder.bind(qClienteRetry()).to(sorvExchange()).with("cliente.retry"); }
     @Bean Binding bClienteRetryBack() { return BindingBuilder.bind(qCliente()).to(sorvExchange()).with("cliente.retry.back"); }
     @Bean Binding bClienteDlq() { return BindingBuilder.bind(qClienteDlq()).to(sorvDlx()).with("cliente.dead"); }
@@ -208,11 +219,22 @@ public class RabbitMqConfig {
             .build();
     }
 
+    @Bean
+    public Jackson2JsonMessageConverter messageConverter() {
+        Jackson2JsonMessageConverter converter = new Jackson2JsonMessageConverter();
+
+        // Configurar mapeamento de tipos
+        DefaultJackson2JavaTypeMapper typeMapper = new DefaultJackson2JavaTypeMapper();
+        typeMapper.setTrustedPackages("com.IceCreamParlor.dto.events");
+
+        converter.setJavaTypeMapper(typeMapper);
+        return converter;
+    }
+
     @Bean Queue qRelatorioDlq() { return QueueBuilder.durable("q.relatorio.dlq").build(); }
 
-    @Bean Binding bRelatorio() { return BindingBuilder.bind(qRelatorio()).to(sorvExchange()).with("relatorio.#"); }
+    @Bean Binding bRelatorioEvento() { return BindingBuilder.bind(qRelatorio()).to(sorvExchange()).with("relatorio.evento.recebido"); }
     @Bean Binding bRelatorioRetry() { return BindingBuilder.bind(qRelatorioRetry()).to(sorvExchange()).with("relatorio.retry"); }
     @Bean Binding bRelatorioRetryBack() { return BindingBuilder.bind(qRelatorio()).to(sorvExchange()).with("relatorio.retry.back"); }
     @Bean Binding bRelatorioDlq() { return BindingBuilder.bind(qRelatorioDlq()).to(sorvDlx()).with("relatorio.dead"); }
-
 }
