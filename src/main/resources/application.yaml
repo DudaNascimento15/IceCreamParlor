@@ -30,6 +30,7 @@ spring:
     username: kmskovrf
     password: Ei9fF3bR2B6P_7_R_vaxARNfCXkKqj1d
     virtual-host: kmskovrf
+    port: 5671
     ssl:
       enabled: true
     # Configurações de conexão
@@ -51,3 +52,18 @@ spring:
           multiplier: 2
         acknowledge-mode: auto
         prefetch: 1
+
+  management:
+    endpoints:
+      web:
+        exposure:
+          include: health,info
+  endpoint:
+    health:
+      show-details: always
+
+  logging:
+    level:
+      org.hibernate.SQL: debug
+      org.hibernate.type.descriptor.sql.BasicBinder: trace
+
